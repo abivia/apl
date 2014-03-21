@@ -1,0 +1,49 @@
+<statusmonitor serverid="WAS1" serverclass="WAS">
+	<service name="mysvc" edittime="2005 04 20 15:34:17">
+		<mirror address="10.1.37.4" sync="15:00" />
+		<checkprocess language="php" method="MySvc.getStatus" />
+		<description>MySvc provides personal service. Shoe shine, mister?</description>
+		<default>
+			<sysinfo>Peachy</sysinfo>
+			<description>The mySvc is operating normally.</description>
+			<custominfo>
+				<attr name="hosttimeout" value="45" />
+			</custominfo>
+		</default>
+		<schedule>
+			<event status="degraded">
+				<sysinfo>Host backup</sysinfo>
+				<description>System response may be slow due to heavy system load</description>
+				<custominfo>
+					<!-- event-level custom data -->
+				</custominfo>
+				<window>
+					<crontime hour="0" minute="30" />
+					<warning time="15:00" />
+					<duration time="2:00:00" />
+					<custominfo>
+						<!-- this data merged into custom info at the event level -->
+						<attr name="hosttimeout" value="90" />
+					</custominfo>
+				</window>
+			</event>
+		</schedule>
+	</service>
+	<service name="wasdb" edittime="2005 04 20 15:34:17">
+		<description>WAS Local Database, providing logging services</description>
+		<checkprocess language="php" method="StatusPlugin::getStatus" />
+		<default>
+			<sysinfo>Operating normally</sysinfo>
+		</default>
+	</service>
+	<service name="remotesvc">
+		<!-- Servers with listen/query instructions -->
+		<server address="204.178.232.5" listen="1" query="10:00" querytimeout="10" />
+		<server address="204.178.232.6" listen="1" />
+		<!--
+			Extensions here to specify when an array of servers results in degraded status.
+			For example, if 4 out of 5 servers are down, then status is degraded (which
+			comes with local custominfo... allowing for adjustments such as timeout.
+		-->
+	</service>
+</statusmonitor>

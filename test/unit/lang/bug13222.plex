@@ -1,0 +1,45 @@
+<?php
+
+class TestLexer { 
+    private $data; 
+    private $N; 
+    private $token; 
+    public $value; 
+    private $line; 
+    private $state = 1; 
+    
+    public function __construct($data) { 
+        $this->data = $data; 
+        $this->N = 0; 
+        $this->line = 1; 
+    } 
+/*!lex2php
+%input $this->data 
+%counter $this->N 
+%token $this->token 
+%value $this->value 
+%line $this->line 
+%matchlongest 1 
+word = /[a-zA-Z0-9']+/ 
+space = /[ \t\n]+/ 
+*/
+
+/*!lex2php
+%statename START 
+word { 
+    echo "Word\n"; 
+    var_dump($this->value); 
+    echo " word subpatterns: \n"; 
+    var_dump($yy_subpatterns); 
+}
+
+space { return FALSE; } 
+*/ }
+
+$a = new TestLexer("They're gone forever"); 
+$a->yylex(); 
+var_dump('advance: ' . $a->value); 
+$a->yylex(); 
+var_dump('advance: ' . $a->value); 
+$a->yylex(); 
+var_dump('advance: ' . $a->value); 

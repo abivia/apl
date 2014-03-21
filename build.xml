@@ -1,0 +1,79 @@
+<!--
+     Phing deploy script for AP5L.
+
+     Supports test and production deployments in both local filesystem and remote server
+-->
+
+<project name="lib.php5" default="all" description="">
+
+    <property file="build.properties"/>
+    <property name="app.name"       value="lib.php5" />
+    <property name="source.dir"     value="../lib.php5/src"/>
+    <property name="test.dir"       value="../lib.php5/test"/>
+
+
+    <target name="all" depends="local_all,remote_all" description="deploy all"/>
+
+    <target name="init">
+        <tstamp/>
+    </target>
+
+    <target name="local_all" depends="local_production,local_test" description="deploy all"/>
+
+    <target name="local_clean" description="Wipe local deploy directories clean">
+        <delete dir="${cfg.local.production}"/>
+        <delete dir="${cfg.local.test}"/>
+    </target>
+
+    <target name="local_production" depends="init" description="deploy production release">
+        <!-- Copy production files (exclude tests) to production directory -->
+        <copy todir="${cfg.local.production}">
+            <fileset dir="${source.dir}">
+                <exclude name="**/test/**" /> <!-- deprecate once all test files moved -->
+                <exclude name="**/thumbs.db" />
+                <exclude name="**/Thumbs.db" />
+            </fileset>
+        </copy>
+    </target>
+
+    <target name="local_test" depends="init" description="deploy test release">
+        <!-- Copy all files (include tests) to test deploy directory + src -->
+        <copy todir="${cfg.local.test}/src">
+            <fileset dir="${source.dir}">
+                <exclude name="**/.*" />
+                <exclude name="**/thumbs.db" />
+                <exclude name="**/Thumbs.db" />
+            </fileset>
+        </copy>
+        <copy todir="${cfg.local.test}/test">
+            <fileset dir="${test.dir}">
+                <exclude name="**/.*" />
+                <exclude name="**/thumbs.db" />
+                <exclude name="**/Thumbs.db" />
+            </fileset>
+        </copy>
+    </target>
+
+    <target name="production_all" depends="local_production,remote_production"
+        description="Deploy production locally and on remote server."
+    />
+
+    <target name="remote_all" depends="remote_production,remote_test"
+        description="deploy all to remote server"
+    />
+
+    <target name="remote_production" depends="init"
+        description="deploy production to remote server"
+    >
+    </target>
+
+    <target name="remote_test" depends="init"
+        description="deploy test to remote server"
+    >
+    </target>
+
+    <target name="test_all" depends="local_test,remote_test"
+        description="Deploy test locally and on remote server."
+    />
+
+</project>

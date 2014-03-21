@@ -1,0 +1,49 @@
+<?php
+
+
+class Bug13221Lexer
+{
+    private $counter;
+    public $token;
+    public $value;
+    private $line;
+    private $input;
+    public $state = 1;
+
+    function __construct($input)
+    {
+        $this->input = $input;
+        $this->N = 0;
+        $this->line = 1;
+    }
+
+/*!lex2php
+%counter {$this->counter}
+%input {$this->input}
+%token {$this->token}
+%value {$this->value}
+%line {$this->line}
+
+SPACE = /[ \t\n]+/
+NAME  = /[\-a-zA-Z0-9]+/
+
+*/
+
+/*!lex2php
+%statename START
+%statename START
+
+NAME {
+    echo "Name\n";
+    var_dump($this->value);
+    echo "    name subpatterns: \n";
+    var_dump($yy_subpatterns);
+}
+
+SPACE { return FALSE; }
+
+*/
+
+}
+
+?>

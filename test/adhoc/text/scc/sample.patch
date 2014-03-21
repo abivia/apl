@@ -1,0 +1,189 @@
+Modified: development/trunk/administrator/components/com_contact/views/contact/view.html.php
+===================================================================
+--- development/trunk/administrator/components/com_contact/views/contact/view.html.php  2009-11-13 17:14:49 UTC (rev 13505)
++++ development/trunk/administrator/components/com_contact/views/contact/view.html.php  2009-11-13 18:06:42 UTC (rev 13506)
+@@ -66,7 +66,7 @@
+        JToolBarHelper::addNew('contact.save2new', 'JToolbar_Save_and_new');
+                // If an existing item, can save to a copy.
+        if (!$isNew) {
+-           JToolBarHelper::custom('contact.save2copy','save-new.png', 'save-new_f2.png', 'JToolbar_Save_as_copy',false );
++           JToolBarHelper::custom('contact.save2copy','save-copy.png', 'save-copy_f2.png', 'JToolbar_Save_as_copy',false );
+        }
+ 
+        if (empty($this->item->id))  {
+
+Modified: development/trunk/administrator/language/en-GB/en-GB.com_search.ini
+===================================================================
+--- development/trunk/administrator/language/en-GB/en-GB.com_search.ini 2009-11-13 17:14:49 UTC (rev 13505)
++++ development/trunk/administrator/language/en-GB/en-GB.com_search.ini 2009-11-13 18:06:42 UTC (rev 13506)
+@@ -20,4 +20,4 @@
+ SEARCH_LOGGING_DISABLED=Search Logging Disabled
+ SEARCH_NO_RESULTS=Off
+ 
+-COM_SEARCH_CONFIGURATION=Search Settings
+\ No newline at end of file
++COM_SEARCH_CONFIGURATION=Search Manager Options
+\ No newline at end of file
+
+Modified: development/trunk/administrator/components/com_newsfeeds/views/newsfeeds/view.html.php
+===================================================================
+--- development/trunk/administrator/components/com_newsfeeds/views/newsfeeds/view.html.php  2009-11-13 17:14:49 UTC (rev 13505)
++++ development/trunk/administrator/components/com_newsfeeds/views/newsfeeds/view.html.php  2009-11-13 18:06:42 UTC (rev 13506)
+@@ -64,6 +64,7 @@
+        if ($canDo->get('core.edit.state')) {
+            JToolBarHelper::custom('newsfeeds.publish', 'publish.png', 'publish_f2.png', 'JToolbar_Publish', true);
+            JToolBarHelper::custom('newsfeeds.unpublish', 'unpublish.png', 'unpublish_f2.png', 'JToolbar_Unpublish', true);
++           JToolBarHelper::divider();
+            if ($state->get('filter.published') != -1) {
+                JToolBarHelper::archiveList('newsfeeds.archive');
+            }
+@@ -75,8 +76,10 @@
+            JToolBarHelper::trash('newsfeeds.trash');
+        }
+        if ($canDo->get('core.admin')) {
++           JToolBarHelper::divider();
+            JToolBarHelper::preferences('com_newsfeeds');
+        }
++       JToolBarHelper::divider();
+        JToolBarHelper::help('screen.newsfeed');
+    }
+ }
+
+Modified: development/trunk/administrator/components/com_plugins/views/plugin/view.html.php
+===================================================================
+--- development/trunk/administrator/components/com_plugins/views/plugin/view.html.php   2009-11-13 17:14:49 UTC (rev 13505)
++++ development/trunk/administrator/components/com_plugins/views/plugin/view.html.php   2009-11-13 18:06:42 UTC (rev 13506)
+@@ -71,6 +71,7 @@
+            JToolBarHelper::apply('plugin.apply');
+        }
+        JToolBarHelper::cancel('plugin.cancel', 'JToolbar_Close');
++       JToolBarHelper::divider();
+        JToolBarHelper::help('screen.plugins.edit');
+    }
+ }
+\ No newline at end of file
+
+Modified: development/trunk/administrator/components/com_plugins/views/plugins/view.html.php
+===================================================================
+--- development/trunk/administrator/components/com_plugins/views/plugins/view.html.php  2009-11-13 17:14:49 UTC (rev 13505)
++++ development/trunk/administrator/components/com_plugins/views/plugins/view.html.php  2009-11-13 18:06:42 UTC (rev 13506)
+@@ -56,16 +56,24 @@
+        $canDo  = PluginsHelper::getActions();
+ 
+        JToolBarHelper::title(JText::_('Plugn_Manager_Plugins'), 'plugin');
+-       if ($canDo->get('core.edit')) {
+-           JToolBarHelper::editList('plugin.edit');
+-       }
++   
+        if ($canDo->get('core.edit.state')) {
+            JToolBarHelper::custom('plugins.publish', 'publish.png', 'publish_f2.png', 'JToolbar_Enable', true);
+            JToolBarHelper::custom('plugins.unpublish', 'unpublish.png', 'unpublish_f2.png', 'JToolbar_Disable', true);
+        }
++       
++       /**
++       * Don't think we need an Edit button if names are clickable.
++       */
++       //if ($canDo->get('core.edit')) {
++       //  JToolBarHelper::editList('plugin.edit');
++       // }
++       
+        if ($canDo->get('core.admin')) {
++           JToolBarHelper::divider();
+            JToolBarHelper::preferences('com_plugins');
+        }
++       JToolBarHelper::divider();
+        JToolBarHelper::help('screen.plugins');
+    }
+ }
+\ No newline at end of file
+
+Modified: development/trunk/administrator/components/com_redirect/views/links/view.html.php
+===================================================================
+--- development/trunk/administrator/components/com_redirect/views/links/view.html.php   2009-11-13 17:14:49 UTC (rev 13505)
++++ development/trunk/administrator/components/com_redirect/views/links/view.html.php   2009-11-13 18:06:42 UTC (rev 13506)
+@@ -63,9 +63,11 @@
+        if ($canDo->get('core.edit')) {
+            JToolBarHelper::editList('link.edit');
+        }
++       
+        if ($canDo->get('core.edit.state')) {
+            JToolBarHelper::custom('links.publish', 'publish.png', 'publish_f2.png', 'JToolbar_Enable', true);
+            JToolBarHelper::custom('links.unpublish', 'unpublish.png', 'unpublish_f2.png', 'JToolbar_Disable', true);
++           JToolBarHelper::divider();
+            if ($state->get('filter.published') != -1) {
+                JToolBarHelper::archiveList('links.archive');
+            }
+
+Modified: development/trunk/administrator/components/com_search/views/searches/view.html.php
+===================================================================
+--- development/trunk/administrator/components/com_search/views/searches/view.html.php  2009-11-13 17:14:49 UTC (rev 13505)
++++ development/trunk/administrator/components/com_search/views/searches/view.html.php  2009-11-13 18:06:42 UTC (rev 13506)
+@@ -56,10 +56,12 @@
+ 
+        JToolBarHelper::title(JText::_('Search_Manager_Searches'), 'search.png');
+        JToolBarHelper::custom('searches.reset', 'refresh.png', 'refresh_f2.png', 'Reset', false);
+-
++       
++       JToolBarHelper::divider();
+        if ($canDo->get('core.admin')) {
+            JToolBarHelper::preferences('com_search');
+        }
++       JToolBarHelper::divider();
+        JToolBarHelper::help('screen.stats.searches');
+    }
+ }
+\ No newline at end of file
+
+Modified: development/trunk/administrator/components/com_users/views/groups/view.html.php
+===================================================================
+--- development/trunk/administrator/components/com_users/views/groups/view.html.php 2009-11-13 17:14:49 UTC (rev 13505)
++++ development/trunk/administrator/components/com_users/views/groups/view.html.php 2009-11-13 18:06:42 UTC (rev 13506)
+@@ -74,7 +74,7 @@
+        {
+            JToolBarHelper::preferences('com_users');
+        }
+-
++       JToolBarHelper::divider();
+        JToolBarHelper::help('screen.users.groups');
+    }
+ }
+
+Modified: development/trunk/administrator/components/com_users/views/levels/view.html.php
+===================================================================
+--- development/trunk/administrator/components/com_users/views/levels/view.html.php 2009-11-13 17:14:49 UTC (rev 13505)
++++ development/trunk/administrator/components/com_users/views/levels/view.html.php 2009-11-13 18:06:42 UTC (rev 13506)
+@@ -71,7 +71,7 @@
+        {
+            JToolBarHelper::preferences('com_users');
+        }
+-
++       JToolBarHelper::divider();
+        JToolBarHelper::help('screen.users.levels');
+    }
+ }
+
+Modified: development/trunk/administrator/components/com_users/views/users/view.html.php
+===================================================================
+--- development/trunk/administrator/components/com_users/views/users/view.html.php  2009-11-13 17:14:49 UTC (rev 13505)
++++ development/trunk/administrator/components/com_users/views/users/view.html.php  2009-11-13 18:06:42 UTC (rev 13506)
+@@ -81,7 +81,7 @@
+        {
+            JToolBarHelper::preferences('com_users');
+        }
+-
++       JToolBarHelper::divider();
+        JToolBarHelper::help('screen.users.users');
+    }
+ }
+\ No newline at end of file
+
+Modified: development/trunk/administrator/language/en-GB/en-GB.com_banners.ini
+===================================================================
+--- development/trunk/administrator/language/en-GB/en-GB.com_banners.ini    2009-11-13 17:14:49 UTC (rev 13505)
++++ development/trunk/administrator/language/en-GB/en-GB.com_banners.ini    2009-11-13 18:06:42 UTC (rev 13506)
+@@ -65,4 +65,4 @@
+ FILTER RESET=Reset
+ 
+ 
+-COM_BANNERS_CONFIGURATION=Banner Manager Settings
++COM_BANNERS_CONFIGURATION=Banner Manager Options

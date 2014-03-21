@@ -1,0 +1,302 @@
+<?php
+
+class AP5L_Lang_Parser_Regex_Lexer {
+    private $input;
+    private $N;
+    protected $_tokenTypes = array(
+        'backreference' => 1,
+        'bar' => 2,
+        'closecharclass' => 3,
+        'closeparen' => 4,
+        'colon' => 5,
+        'comment' => 6,
+        'controlchar' => 7,
+        'couldbebackref' => 8,
+        'escapedbackslash' => 9,
+        'fullstop' => 10,
+        'hyphen' => 11,
+        'internaloptions' => 12,
+        'matchend' => 13,
+        'matchstart' => 14,
+        'multiplier' => 15,
+        'negate' => 16,
+        'negativelookahead' => 17,
+        'negativelookbehind' => 18,
+        'onceonly' => 19,
+        'openassertion' => 20,
+        'opencharclass' => 21,
+        'openparen' => 22,
+        'patternname' => 23,
+        'positivelookahead' => 24,
+        'positivelookbehind' => 25,
+        'recur' => 26,
+        'text' => 27,
+    );
+    public $token;
+    public $value;
+    public $line;
+
+    function __construct($data,  $options = array())
+    {
+        $this -> setOptions($options);
+        $this->input = $data;
+        $this->N = 0;
+    }
+
+    function reset($data, $line)
+    {
+        $this->input = $data;
+        $this->N = 0;
+        // passed in from parent parser
+        $this->line = $line;
+        $this->yybegin(self::INITIAL);
+    }
+
+    /**
+     * Set options.
+     *
+     * @param array Options. Defined option is 'tokentypes', which allows
+     * the application to provide new token type codes.
+     * @return void
+     */
+    function setOptions($options) {
+        if (isset($options['tokentypes'])) {
+            $this -> _tokenTypes = array_merge(
+                $this -> _tokenTypes, $options['tokentypes']
+            );
+        }
+    }
+
+/*!lex2php
+%input {$this->input}
+%counter {$this->N}
+%token {$this->token}
+%value {$this->value}
+%line {$this->line}
+NONESCAPE = /[^[\\^$.|()?*+{}]+/
+NONESCAPECHARCLASS = /[^\-\\]/
+ESCAPEDTHING = /\\[][{}*.^$|?()+]/
+ESCAPEDCHARCLASSTHING = /\\[]\.\-\^]/
+MULTIPLIER = /\*\?|\+\?|[*?+]|\{[0-9]+\}|\{[0-9]+,\}|\{[0-9]+,[0-9]+\}/
+STRINGCHAR = /\\[frnt]|\\x[0-9a-fA-F][0-9a-fA-F]?|\\[0-7][0-7][0-7]|\\x\{[0-9a-fA-F]+\}/
+CONTROLCHAR = /\\[abBGcedDsSwW0C]|\\c\\/
+COULDBEBACKREF = /\\[0-9][0-9]/
+CHARCLASSCONTROLCHAR = /\\[bacedDsSwW0C]|\\c\\|\\x\{[0-9a-fA-F]+\}|\\[0-7][0-7][0-7]|\\x[0-9a-fA-F][0-9a-fA-F]?/
+SUBJECTEND = /\\[zZ]/
+BACKREF = /\\[1-9]/
+UNICODESTUFF = /\\p\{\^?..?\}|\\P\{..?\}|\\X/
+PROPERTYCODES = /C[cfnos]?|L[lmotu]?|M[cen]?|N[dlo]?|P[cdefios]?|S[ckmo]?|Z[lps]?/
+SIMPLEPROPERTYCODES = /[CLMNPSZ]/
+INTERNALOPTIONS = /[imsxUX]+-[imsxUX]+|[imsxUX]+|-[imsxUX]+/
+ANYTHING = /./
+PATTERNNAME = /[^>]+/
+COMMENT = /#[^)]+/
+HYPHEN = /-(?!])/
+*/
+/*!lex2php
+%statename INITIAL
+"\\\\" {
+    $this->token = $this -> _tokenTypes['escapedbackslash'];
+}
+NONESCAPE {
+    $this->token = $this -> _tokenTypes['text'];
+}
+ESCAPEDTHING {
+    $this->token = $this -> _tokenTypes['controlchar'];
+}
+"[" {
+    $this->token = $this -> _tokenTypes['opencharclass'];
+    $this->yybegin(self::CHARACTERCLASSSTART);
+}
+"|" {
+    $this->token = $this -> _tokenTypes['bar'];
+}
+STRINGCHAR {
+    $this->token = $this -> _tokenTypes['text'];
+}
+COULDBEBACKREF {
+    $this->token = $this -> _tokenTypes['couldbebackref'];
+}
+CONTROLCHAR {
+    $this->token = $this -> _tokenTypes['controlchar'];
+}
+"^" {
+    $this->token = $this -> _tokenTypes['matchstart'];
+}
+"\\A" {
+    $this->token = $this -> _tokenTypes['matchstart'];
+}
+")" {
+    $this->token = $this -> _tokenTypes['closeparen'];
+    $this->yybegin(self::INITIAL);
+}
+"$" {
+    $this->token = $this -> _tokenTypes['matchend'];
+}
+MULTIPLIER {
+    $this->token = $this -> _tokenTypes['multiplier'];
+}
+SUBJECTEND {
+    $this->token = $this -> _tokenTypes['matchend'];
+}
+"(?" {
+    $this->token = $this -> _tokenTypes['openassertion'];
+    $this->yybegin(self::ASSERTION);
+}
+"(" {
+    $this->token = $this -> _tokenTypes['openparen'];
+}
+"." {
+    $this->token = $this -> _tokenTypes['fullstop'];
+}
+BACKREF {
+    $this->token = $this -> _tokenTypes['backreference'];
+}
+UNICODESTUFF {
+    $this->token = $this -> _tokenTypes['controlchar'];
+}
+"\\p{" PROPERTYCODES "}" {
+    $this->token = $this -> _tokenTypes['controlchar'];
+}
+"\\p{^" PROPERTYCODES "}" {
+    $this->token = $this -> _tokenTypes['controlchar'];
+}
+"\\p" SIMPLEPROPERTYCODES {
+    $this->token = $this -> _tokenTypes['controlchar'];
+}
+"\\" {
+    return false;
+}
+*/
+/*!lex2php
+%statename CHARACTERCLASSSTART
+"^" {
+    $this->token = $this -> _tokenTypes['negate'];
+}
+"]" {
+    $this->yybegin(self::CHARACTERCLASS);
+    $this->token = $this -> _tokenTypes['text'];
+}
+ANYTHING {
+    $this->yybegin(self::CHARACTERCLASS);
+    return true;
+}
+*/
+/*!lex2php
+%statename CHARACTERCLASS
+"\\\\" {
+    $this->token = $this -> _tokenTypes['escapedbackslash'];
+}
+"]" {
+    $this->yybegin(self::INITIAL);
+    $this->token = $this -> _tokenTypes['closecharclass'];
+}
+STRINGCHAR {
+    $this->token = $this -> _tokenTypes['text'];
+}
+CHARCLASSCONTROLCHAR {
+    $this->token = $this -> _tokenTypes['text'];
+}
+COULDBEBACKREF {
+    $this->token = $this -> _tokenTypes['couldbebackref'];
+}
+BACKREF {
+    $this->token = $this -> _tokenTypes['backreference'];
+}
+ESCAPEDCHARCLASSTHING {
+    $this->token = $this -> _tokenTypes['text'];
+}
+HYPHEN {
+    $this->token = $this -> _tokenTypes['hyphen'];
+    $this->yybegin(self::RANGE);
+}
+NONESCAPECHARCLASS {
+    $this->token = $this -> _tokenTypes['text'];
+}
+"\\" {
+    return false; // ignore escaping of normal text
+}
+ANYTHING {
+    $this->token = $this -> _tokenTypes['text'];
+}
+*/
+/*!lex2php
+%statename RANGE
+"\\\\" {
+    $this->token = $this -> _tokenTypes['escapedbackslash'];
+}
+"\\]" {
+    $this->token = $this -> _tokenTypes['text'];
+    $this->yybegin(self::CHARACTERCLASS);
+}
+CHARCLASSCONTROLCHAR {
+    $this->token = $this -> _tokenTypes['text'];
+    $this->yybegin(self::CHARACTERCLASS);
+}
+COULDBEBACKREF {
+    $this->token = $this -> _tokenTypes['couldbebackref'];
+}
+BACKREF {
+    $this->token = $this -> _tokenTypes['backreference'];
+}
+NONESCAPECHARCLASS {
+    $this->token = $this -> _tokenTypes['text'];
+    $this->yybegin(self::CHARACTERCLASS);
+}
+"\\" {
+    return false; // ignore escaping of normal text
+}
+*/
+/*!lex2php
+%statename ASSERTION
+INTERNALOPTIONS {
+    $this->token = $this -> _tokenTypes['internaloptions'];
+}
+":" {
+    $this->token = $this -> _tokenTypes['colon'];
+    $this->yybegin(self::INITIAL);
+}
+")" {
+    $this->token = $this -> _tokenTypes['closeparen'];
+    $this->yybegin(self::INITIAL);
+}
+"P<" PATTERNNAME ">" {
+    $this->token = $this -> _tokenTypes['patternname'];
+    $this->yybegin(self::INITIAL);
+}
+"<=" {
+    $this->token = $this -> _tokenTypes['positivelookbehind'];
+    $this->yybegin(self::INITIAL);
+}
+"<!" {
+    $this->token = $this -> _tokenTypes['negativelookbehind'];
+    $this->yybegin(self::INITIAL);
+}
+"=" {
+    $this->token = $this -> _tokenTypes['positivelookahead'];
+    $this->yybegin(self::INITIAL);
+}
+"!" {
+    $this->token = $this -> _tokenTypes['negativelookahead'];
+    $this->yybegin(self::INITIAL);
+}
+">" {
+    $this->token = $this -> _tokenTypes['onceonly'];
+    $this->yybegin(self::INITIAL);
+}
+"(?" {
+    $this->token = $this -> _tokenTypes['openassertion'];
+}
+COMMENT {
+    $this->token = $this -> _tokenTypes['comment'];
+    $this->yybegin(self::INITIAL);
+}
+"R" {
+    $this->token = $this -> _tokenTypes['recur'];
+}
+ANYTHING {
+    $this->yybegin(self::INITIAL);
+    return true;
+}
+*/
+}

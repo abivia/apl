@@ -1,0 +1,54 @@
+--- CodeFix.php	Thu Jan 15 04:14:12 1970
++++ CodeFix.php	Thu Jan 15 04:14:12 1970
+@@ -27,6 +27,8 @@
+             array('/=>\s+/', '=> '),                    // Whitespace after assignment
+             array('/@(param|return)\s+([a-z0-9_\-$]+)\s+/i', '@\1 \2 '),
+             array('/([a-z0-9_\)\]])\s*->/i', '\1 ->'),
++            array('/->\s*/', '-> '),
++            array('_^(\s*\*\s*@\w+)\s+_', '\1 '),       // Whitespace after phpdoc directives
+             array('_case\s*\(\s*([^\)]+)\s*\)\s*:_i', 'case \1:'), // redundant () in case
+             );
+         // Convert tha maps into something easily iterated
+@@ -143,6 +145,10 @@
+         if ($lastKey != -1 && trim($buffer[$lastKey]) == '?>') {
+             unset($buffer[$lastKey]);
+         }
++        // Kill trailing blank lines again
++        while (count($buffer) && trim(end($buffer)) == '') {
++            unset($buffer[key($buffer)]);
++        }
+         $buffer = implode(AP5L::LF, $buffer) . AP5L::LF;
+         file_put_contents($path, $buffer);
+     }
+@@ -170,6 +176,7 @@
+                 //'directories' => 'first'
+             )
+         );
++        $disp -> unlisten($this);
+     }
+ 
+     /**
+--- ZipDirectory.php	Thu Jan 15 04:14:12 1970
++++ ZipDirectory.php	Thu Jan 15 04:14:12 1970
+@@ -3,6 +3,12 @@
+ class ZipDirectory extends AP5L_Php_InflexibleObject {
+     protected $_zip;
+ 
++    /**
++     * Add file event handler.
++     *
++     * @param array Information on the source file.
++     * @return boolean True if the file should be added.
++     */
+     function onAddFile($info) {
+         return true;
+     }
+@@ -31,6 +37,8 @@
+                 'directories' => 'first'
+             )
+         );
++        $disp -> unlisten($this);
++        $this -> _zip -> close();
+     }
+ 
+     /**
