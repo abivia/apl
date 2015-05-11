@@ -4,7 +4,7 @@
  */
 
 /**
- * 
+ *
  */
 require_once '../AP5L.php';
 
@@ -21,4 +21,3 @@ if ($argc > 1) {
 } else {
     $dl -> dump();
 }
-?>

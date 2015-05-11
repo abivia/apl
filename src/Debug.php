@@ -388,8 +388,9 @@ abstract class AP5L_Debug implements AP5L_DebugProvider {
      * dumpconfig@space::Package_.
      * @param mixed The corresponding value. Typically boolean, but it can be
      * anything.
+     * @return The current object.
      */
-    function setState($key, $value) {
+    function &setState($key, $value) {
         $key = $this -> _keyNormalize($key);
         if (! isset($this -> _settings[$key])) {
             /*
@@ -402,6 +403,7 @@ abstract class AP5L_Debug implements AP5L_DebugProvider {
             $this -> _handleRefresh = true;
         }
         $this -> _settings[$key] = $value;
+        return $this;
     }
 
     /**
@@ -486,4 +488,3 @@ abstract class AP5L_Debug implements AP5L_DebugProvider {
 
 }
 
-?>

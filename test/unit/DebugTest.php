@@ -142,4 +142,4 @@ class DebugTest extends PHPUnit_Framework_TestCase {
 if (PHPUnit_MAIN_METHOD == 'DebugTest::main') {
     DebugTest::main();
 }
-?>
+

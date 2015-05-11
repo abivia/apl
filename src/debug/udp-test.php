@@ -18,5 +18,3 @@ AP5L::install();
 $dl = AP5L_Debug_Udp::getInstance();
 $dl -> setState('', true);
 $dl -> writeln('test output');
-
-?>

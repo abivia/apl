@@ -100,4 +100,4 @@ interface AP5L_DebugProvider {
     function writeln($data, $handle = null, $options = array());
 
 }
-?>
+

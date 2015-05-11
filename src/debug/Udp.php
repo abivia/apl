@@ -10,7 +10,7 @@
 
 /**
  * Remote diagnostic output via UDP.
- * 
+ *
  * @package AP5L
  * @subpackage Debug
  */
@@ -51,6 +51,11 @@ class AP5L_Debug_Udp extends AP5L_Debug {
         }
     }
 
+    /**
+     * Connect to a remote via UDP
+     *
+     * @param type $addrPort string Address:port to connect to
+     */
     function connect($addrPort = '') {
         $this -> _close();
         if ($addrPort != '') {
