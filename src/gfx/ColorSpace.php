@@ -177,6 +177,8 @@ class AP5L_Gfx_ColorSpace extends AP5L_Php_InflexibleObject {
                 $h = 0.0;
             }
             $this -> _hue = $h;
+        } else {
+            $this -> _hue = 0.0;
         }
     }
 
@@ -231,38 +233,6 @@ class AP5L_Gfx_ColorSpace extends AP5L_Php_InflexibleObject {
             $this -> _red = $this -> _bright;
             $this -> _green = $this -> _bright;
             $this -> _blue = $this -> _bright;
-        }
-    }
-
-    /*
-     * Calculate a normalized hue, on a scale of 0 to 1, using the scale of
-     * human perception of colour differences in ColorSpaceDeltas.
-     */
-    protected function _hueHuman() {
-        if (! $this -> _hue) return 0.0;
-        for ($ind = 0; $ind < count(self::$_hueDeltas); ++$ind) {
-            if (self::$_hueDeltas[$ind][0] >= $this -> _hue) {
-                $csd = self::$_hueDeltas[$ind][0] - self::$_hueDeltas[$ind - 1][0];
-                $hsd = $this -> _hue - self::$_hueDeltas[$ind - 1][0];
-                $mcsd = self::$_hueDeltas[$ind][1] - self::$_hueDeltas[$ind - 1][1];
-                return  self::$_hueDeltas[$ind - 1][1] + ($hsd / $csd * $mcsd);
-            }
-        }
-    }
-
-    /*
-     * Calculate a hue, from a factor representing human perception of color
-     * differences
-     */
-    static protected function _hueHumanInv($hh) {
-        if (! $hh) return 0.0;
-        for ($ind = 0; $ind < count(self::$_hueDeltas); ++$ind) {
-            if (self::$_hueDeltas[$ind][1] >= $hh) {
-                $csd = self::$_hueDeltas[$ind][1] - self::$_hueDeltas[$ind - 1][1];
-                $hsd = $hh - self::$_hueDeltas[$ind - 1][1];
-                $mcsd = self::$_hueDeltas[$ind][0] - self::$_hueDeltas[$ind - 1][0];
-                return  self::$_hueDeltas[$ind - 1][0] + ($hsd / $csd * $mcsd);
-            }
         }
     }
 
@@ -472,6 +442,14 @@ class AP5L_Gfx_ColorSpace extends AP5L_Php_InflexibleObject {
         return $this -> _hue;
     }
 
+    /*
+     * Calculate a normalized hue, on a scale of 0 to 1, using the scale of
+     * human perception of colour differences in ColorSpaceDeltas.
+     */
+    function getHueHuman() {
+        return  self::hueToHuman($this -> _hue);
+    }
+
     function getHueInt() {
         return (int) round(255 * $this -> _hue);
     }
@@ -524,15 +502,42 @@ class AP5L_Gfx_ColorSpace extends AP5L_Php_InflexibleObject {
      * perception factors.
      */
     function hueDistance($cs) {
-        $hd = 2 * abs($this -> _hueHuman() - $cs -> _hueHuman());
+        $hd = 2 * abs(self::hueToHuman($this -> _hue) - self::hueToHuman($cs -> getHue()));
         if ($hd > 1) {
             $hd = 2 - $hd;
         }
     }
 
-    function imageColorAllocate($im) {
-        return imagecolorallocatealpha($im, $this -> getRedInt(),
-            $this -> getGreenInt(), $this -> getBlueInt(), $this -> getAlphaInt());
+    /*
+     * Calculate a normalized hue, on a scale of 0 to 1, using the scale of
+     * human perception of colour differences in ColorSpaceDeltas.
+     */
+    static function hueToHuman($hue) {
+        if (! $hue) return 0.0;
+        for ($ind = 0; $ind < count(self::$_hueDeltas); ++$ind) {
+            if (self::$_hueDeltas[$ind][0] >= $hue) {
+                $csd = self::$_hueDeltas[$ind][0] - self::$_hueDeltas[$ind - 1][0];
+                $hsd = $hue - self::$_hueDeltas[$ind - 1][0];
+                $mcsd = self::$_hueDeltas[$ind][1] - self::$_hueDeltas[$ind - 1][1];
+                return  self::$_hueDeltas[$ind - 1][1] + ($hsd / $csd * $mcsd);
+            }
+        }
+    }
+
+    /*
+     * Calculate a hue, from a factor representing human perception of color
+     * differences
+     */
+    static function humantoHue($hh) {
+        if (! $hh) return 0.0;
+        for ($ind = 0; $ind < count(self::$_hueDeltas); ++$ind) {
+            if (self::$_hueDeltas[$ind][1] >= $hh) {
+                $csd = self::$_hueDeltas[$ind][1] - self::$_hueDeltas[$ind - 1][1];
+                $hsd = $hh - self::$_hueDeltas[$ind - 1][1];
+                $mcsd = self::$_hueDeltas[$ind][0] - self::$_hueDeltas[$ind - 1][0];
+                return  self::$_hueDeltas[$ind - 1][0] + ($hsd / $csd * $mcsd);
+            }
+        }
     }
 
     static function rgbaIntBlend($colL, $colR, $ratio, $blendAlpha = false) {
@@ -653,6 +658,16 @@ class AP5L_Gfx_ColorSpace extends AP5L_Php_InflexibleObject {
         }
         $this -> _bright = $this -> _limit($b);
         $this -> _calcRgb();
+    }
+
+    function setGray($g) {
+        if (is_int($g)) {
+            $g /= 255.0;
+        }
+        $this -> _red = $this -> _limit($g);
+        $this -> _green = $this -> _limit($g);
+        $this -> _blue = $this -> _limit($g);
+        $this -> _calcHsb();
     }
 
     function setGreen($g) {
@@ -780,7 +795,7 @@ class AP5L_Gfx_ColorSpace extends AP5L_Php_InflexibleObject {
     }
 
     function setHueHuman($hh) {
-        $this -> _hue = $this -> _hueHumanInv($hh);
+        $this -> _hue = self::humantoHue($hh);
         $this -> _calcRgb();
     }
 

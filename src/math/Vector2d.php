@@ -28,6 +28,11 @@ class AP5L_Math_Vector2d {
      */
     public $direction;
 
+    function __clone() {
+        $this -> org = clone $this -> org;
+        $this -> direction = clone $this -> direction;
+    }
+    
     /**
      * Construct a new vector.
      */
@@ -80,7 +85,7 @@ class AP5L_Math_Vector2d {
 
     /**
      * Create a vector from another vector or point.
-     * 
+     *
      * @param AP5L_Math_Vector2d|AP5L_Math_Point2d Vector: vector to be cloned;
      * Point: If direction is provided, this is the vector's start point. If it
      * is not, then the result is a vector from (0,0) to this point.

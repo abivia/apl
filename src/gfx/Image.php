@@ -372,9 +372,9 @@ class AP5L_Gfx_Image extends AP5L_Php_InflexibleObject {
                 'Unable to determine border color.'
             );
         }
-        $bc = $border -> imageColorAllocate($this -> _im);
+        $bc = $this -> colorAllocate($border);
         if ($fill) {
-            $fc = $fill -> imageColorAllocate($this -> _im);
+            $fc = $this -> colorAllocate($fill);
             imagefilledarc($this -> _im, $vec -> getLeft(), $vec -> getTop(),
                 $vec -> direction -> x, $vec -> direction -> y,
                 $degStart, $degEnd, $fc, $style);
@@ -386,6 +386,20 @@ class AP5L_Gfx_Image extends AP5L_Php_InflexibleObject {
                 $degStart, $degEnd, $bc);
         }
         return $this;
+    }
+
+    function clear($background = null) {
+        if (! $background) {
+            $fc = imagecolorallocatealpha($this -> _im, 0, 0, 0, 127);
+        } else {
+            $fc = $this -> colorAllocate($background);
+        }
+        imagefill($this -> _im, 0, 0, $fc);
+    }
+
+    function colorAllocate($c) {
+        return imagecolorallocatealpha($this -> _im, $c -> getRedInt(),
+            $c -> getGreenInt(), $c -> getBlueInt(), $c -> getAlphaInt());
     }
 
     /**
@@ -465,6 +479,41 @@ class AP5L_Gfx_Image extends AP5L_Php_InflexibleObject {
             }
             break;
         }
+        if (! $result) {
+            throw new AP5L_Gfx_Exception(
+                __METHOD__ . ': Operation failed in GD library.'
+            );
+        }
+        return $this;
+    }
+
+    /**
+     * Crop the image.
+     *
+     * @param AP5L_Math_Vector2d An area in the source image that will
+     * be retained.
+     * @throws AP5L_Gfx_Exception
+     * @return AP5L_Gfx_Image The current image object.
+     */
+    function &crop($from) {
+        AP5L::getDebug() -> write('Crop area=' . $from);
+        if (! $from instanceof AP5L_Math_Vector2d) {
+            throw new AP5L_Gfx_Exception(
+                __METHOD__ . ': bad from argument ' . get_class($from) . '.'
+            );
+        }
+        if (! $this -> _im) {
+            throw new AP5L_Gfx_Exception(
+                __METHOD__ . ': Target image not created.'
+            );
+        }
+        $rect = array(
+            'x' => $from -> org -> x,
+            'y' => $from -> org -> y,
+            'width' => $from -> getSizeX(),
+            'height' => $from -> getSizeY()
+        );
+        $result = imagecrop($this -> _im, $rect);
         if (! $result) {
             throw new AP5L_Gfx_Exception(
                 __METHOD__ . ': Operation failed in GD library.'
@@ -605,7 +654,7 @@ class AP5L_Gfx_Image extends AP5L_Php_InflexibleObject {
                 'Unable to determine border color.'
             );
         }
-        $bc = $border -> imageColorAllocate($this -> _im);
+        $bc = $this -> colorAllocate($border);
         if (AP5L::getDebug() -> isEnabled()) {
             AP5L::getDebug() -> writeln('im:<pre>' . print_r($this -> _im, true) . '</pre>');
             AP5L::getDebug() -> writeln($box);
@@ -621,7 +670,7 @@ class AP5L_Gfx_Image extends AP5L_Php_InflexibleObject {
         }
         $result = false;
         if ($fill) {
-            $fc = $fill -> imageColorAllocate($this -> _im);
+            $fc = $this -> colorAllocate($fill);
             /*
             echo 'Fillellipse ' . $fc . '<br/>';
             /**/
@@ -834,7 +883,7 @@ class AP5L_Gfx_Image extends AP5L_Php_InflexibleObject {
                 'Line color must have type AP5L_Gfx_ColorSpace'
             );
         }
-        $dc = $draw -> imageColorAllocate($this -> _im);
+        $dc = $this -> colorAllocate($draw);
         $end = $vec -> getEnd();
         /*
         echo $vec -> org -> __toString() . ' ' . $end -> __toString() . '<br/>';
@@ -1184,7 +1233,7 @@ class AP5L_Gfx_Image extends AP5L_Php_InflexibleObject {
                 'Unable to determine border color.'
             );
         }
-        $bc = $border -> imageColorAllocate($this -> _im);
+        $bc = $this -> colorAllocate($border);
         $debug = &AP5L::getDebug();
         if ($debug -> isEnabled()) {
             $dbh = $debug -> getHandle();
@@ -1201,7 +1250,7 @@ class AP5L_Gfx_Image extends AP5L_Php_InflexibleObject {
         }
         $result = false;
         if ($fill) {
-            $fc = $fill -> imageColorAllocate($this -> _im);
+            $fc = $this -> colorAllocate($fill);
             /*
             echo 'Fillrect ' . $fc . '<br/>';
             /**/
@@ -1386,7 +1435,7 @@ class AP5L_Gfx_Image extends AP5L_Php_InflexibleObject {
         $font = array_shift($args);
         $size = array_shift($args);
         $draw = count($args) ? $args[0] : $this -> _drawColor;
-        $dc = $draw -> imageColorAllocate($this -> _im);
+        $dc = $this -> colorAllocate($draw);
         /*
         echo 'size=', $size, ' ang=', $direction[1], ' x=',
             $direction[0] -> x, ' y=', $direction[0] -> y, ' dc=', $dc,
