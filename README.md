@@ -15,4 +15,4 @@ the modern world is PHP 8.1 -- if PHP 10.0 is current, run).
 
 An unreliable list of ported modules follows.
 
-* Abivia\Apl\Math
+* Abivia\Apl\Math - Basic support for 2D and 3D vector and matrix operations.
