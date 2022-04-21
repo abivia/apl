@@ -71,7 +71,7 @@
     foreach ($this->yy_get_expected_tokens($yymajor) as $token) {
         $expect[] = self::$yyTokenName[$token];
     }
-    throw new Exception('Unexpected ' . $this->tokenName($yymajor) . '(' . $TOKEN
+    throw new MathException('Unexpected ' . $this->tokenName($yymajor) . '(' . $TOKEN
         . '), expected one of: ' . implode(',', $expect));
 }
 %include_class {
@@ -107,7 +107,7 @@
     function __construct($outfile, $lex) {
         $this->out = fopen($outfile, 'wb');
         if (!$this->out) {
-            throw new Exception('unable to open lexer output file "' . $outfile . '"');
+            throw new MathException('unable to open lexer output file "' . $outfile . '"');
         }
         $this->lex = $lex;
         $this->_regexLexer = new AP5L_Lang_Parser_Regex_Lexer('');
@@ -142,7 +142,7 @@
                 }
             }
             if (!$match) {
-                throw new Exception(\'Unexpected input at line \' . ' . $this->line . ' .
+                throw new MathException(\'Unexpected input at line \' . ' . $this->line . ' .
                     \': \' . ' . $this->input . '[' . $this->counter . ']);
             }
             ' . $this->token . ' = $match[1];
@@ -176,7 +176,7 @@
                 // yymore is needed
                 do {
                     if (!isset($yy_yymore_patterns[' . $this->token . '])) {
-                        throw new Exception(\'cannot do yymore for the last token\');
+                        throw new MathException(\'cannot do yymore for the last token\');
                     }
                     $match = false;
                     foreach ($yy_yymore_patterns[' . $this->token . '] as $index => $rule) {
@@ -193,7 +193,7 @@
                         }
                     }
                     if (!$match) {
-                        throw new Exception(\'Unexpected input at line \' . ' . $this->line . ' .
+                        throw new MathException(\'Unexpected input at line \' . ' . $this->line . ' .
                             \': \' . ' . $this->input . '[' . $this->counter . ']);
                     }
                     ' . $this->token . ' = $match[1];
@@ -259,7 +259,7 @@
                 $yysubmatches = $yymatches;
                 $yymatches = array_filter($yymatches, \'strlen\'); // remove empty sub-patterns
                 if (!count($yymatches)) {
-                    throw new Exception(\'Error: lexing failed because a rule matched\' .
+                    throw new MathException(\'Error: lexing failed because a rule matched\' .
                         \' an empty string.  Input "\' . substr(' . $this->input . ',
                         ' . $this->counter . ', 5) . \'... state ' . $statename . '\');
                 }
@@ -307,7 +307,7 @@
                     // yymore is needed
                     do {
                         if (!strlen($yy_yymore_patterns[' . $this->token . '][1])) {
-                            throw new Exception(\'cannot do yymore for the last token\');
+                            throw new MathException(\'cannot do yymore for the last token\');
                         }
                         $yysubmatches = array();
                         if (preg_match(\'/\' . $yy_yymore_patterns[' . $this->token . '][1] . \'/' . $this->patternFlags . '\',
@@ -348,7 +348,7 @@
                     }
                 }
             } else {
-                throw new Exception(\'Unexpected input at line\' . ' . $this->line . ' .
+                throw new MathException(\'Unexpected input at line\' . ' . $this->line . ' .
                     \': \' . ' . $this->input . '[' . $this->counter . ']);
             }
             break;
@@ -598,7 +598,7 @@ declarations(A) ::= processing_instructions(B) pattern_declarations(C). {
             continue;
         }
         if (count($expected)) {
-            throw new Exception('Processing Instructions "' .
+            throw new MathException('Processing Instructions "' .
                 implode(', ', array_keys($expected)) . '" must be defined');
         }
     }
@@ -652,7 +652,7 @@ pattern_declarations(A) ::= PATTERN(B) subpattern(C). {
 pattern_declarations(A) ::= pattern_declarations(B) PATTERN(C) subpattern(D). {
     A = B;
     if (isset(A[C])) {
-        throw new Exception('Pattern "' . C . '" is already defined as "' .
+        throw new MathException('Pattern "' . C . '" is already defined as "' .
             A[C] . '", cannot redefine as "' . D->string . '"');
     }
     A[C] = D;
@@ -665,7 +665,7 @@ rules(A) ::= COMMENTSTART rule(B) COMMENTEND. {
 }
 rules(A) ::= COMMENTSTART PI(P) SUBPATTERN(S) rule(B) COMMENTEND. {
     if (P != 'statename') {
-        throw new Exception('Error: only %statename processing instruction ' .
+        throw new MathException('Error: only %statename processing instruction ' .
             'is allowed in rule sections (found ' . P . ').');
     }
     A = array(array('rules' => B, 'code' => '', 'statename' => S));
@@ -675,7 +675,7 @@ rules(A) ::= COMMENTSTART rule(B) COMMENTEND PHPCODE(C). {
 }
 rules(A) ::= COMMENTSTART PI(P) SUBPATTERN(S) rule(B) COMMENTEND PHPCODE(C). {
     if (P != 'statename') {
-        throw new Exception('Error: only %statename processing instruction ' .
+        throw new MathException('Error: only %statename processing instruction ' .
             'is allowed in rule sections (found ' . P . ').');
     }
     A = array(array('rules' => B, 'code' => C, 'statename' => S));
@@ -688,7 +688,7 @@ rules(A) ::= reset_rules(R) rule(B) COMMENTEND. {
 }
 rules(A) ::= reset_rules(R) PI(P) SUBPATTERN(S) rule(B) COMMENTEND. {
     if (P != 'statename') {
-        throw new Exception('Error: only %statename processing instruction ' .
+        throw new MathException('Error: only %statename processing instruction ' .
             'is allowed in rule sections (found ' . P . ').');
     }
     A = R;
@@ -700,7 +700,7 @@ rules(A) ::= reset_rules(R) rule(B) COMMENTEND PHPCODE(C). {
 }
 rules(A) ::= reset_rules(R) PI(P) SUBPATTERN(S) rule(B) COMMENTEND PHPCODE(C). {
     if (P != 'statename') {
-        throw new Exception('Error: only %statename processing instruction ' .
+        throw new MathException('Error: only %statename processing instruction ' .
             'is allowed in rule sections (found ' . P . ').');
     }
     A = R;
@@ -743,7 +743,7 @@ rule_subpattern(A) ::= SINGLEQUOTE(B). {
 rule_subpattern(A) ::= SUBPATTERN(B). {
     if (!isset($this->patterns[B])) {
         $this->error('Undefined pattern "' . B . '" used in rules');
-        throw new Exception('Undefined pattern "' . B . '" used in rules');
+        throw new MathException('Undefined pattern "' . B . '" used in rules');
     }
     A = array($this->patterns[B], B);
 }
@@ -756,7 +756,7 @@ rule_subpattern(A) ::= rule_subpattern(B) SINGLEQUOTE(C). {
 rule_subpattern(A) ::= rule_subpattern(B) SUBPATTERN(C). {
     if (!isset($this->patterns[C])) {
         $this->error('Undefined pattern "' . C . '" used in rules');
-        throw new Exception('Undefined pattern "' . C . '" used in rules');
+        throw new MathException('Undefined pattern "' . C . '" used in rules');
     }
     A = array(B[0] . $this->patterns[C], B[1] . ' ' . C);
 }

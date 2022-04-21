@@ -1,12 +1,13 @@
 <?php
 /**
- * Abivia PHP5 Library
+ * Abivia PHP Library
  *
  * @license http://www.gnu.org/licenses/gpl-3.0.html GPLv3
  * @copyright 2007-2008, Alan Langford
  * @version $Id: ColorSpace.php 100 2011-03-21 18:26:21Z alan.langford@abivia.com $
  * @author Alan Langford <alan.langford@abivia.com>
  */
+namespace Apl\Gfx;
 
 /**
  * Multiple model representation of a color.
@@ -18,10 +19,10 @@
  * functions that help indicate how different a human will perceive colors to
  * be.
  *
- * @package AP5L
+ * @package Apl
  * @subpackage Gfx
  */
-class AP5L_Gfx_ColorSpace extends AP5L_Php_InflexibleObject {
+class ColorSpace extends \Apl\Php\InflexibleObject {
     /**
      * Alpha channel, common to all models, range 0 to 1.
      *
@@ -295,8 +296,8 @@ class AP5L_Gfx_ColorSpace extends AP5L_Php_InflexibleObject {
      * Calculate an intermediate color from two colors, return as integer.
      *
      * This is useful in computation, e.g. to compute an incremental transition
-     * between two colors. It has a speed advantage ofer blend() because no
-     * ColorSpace object is greated.
+     * between two colors. It has a speed advantage over blend() because no
+     * ColorSpace object is created.
      *
      * @param AP5L_Gfx_ColorSpace The color to transition to.
      * @param float Linear point between colors, where 0 is no change and 1.0
@@ -360,7 +361,7 @@ class AP5L_Gfx_ColorSpace extends AP5L_Php_InflexibleObject {
      * @param int|float The alpha component of the colour. If an integer is
      * provided, it is treated as being in the range 0-127; floats are in the
      * range 0.0-1.0. Defaults to zero.
-     * @return AP5L_Gfx_ColorSpace The new ColorSpace object.
+     * @return \Apl\Gfx\ColorSpace The new ColorSpace object.
      */
     static function &factory($r = 0, $g = 0, $b = 0, $a = 0) {
         if (is_array($r)) {
@@ -369,20 +370,20 @@ class AP5L_Gfx_ColorSpace extends AP5L_Php_InflexibleObject {
             }
             list($r, $g, $b, $a) = $r;
         }
-        if ($r instanceof AP5L_Gfx_ColorSpace) {
-            $c = new AP5L_Gfx_ColorSpace(
+        if ($r instanceof ColorSpace) {
+            $c = new ColorSpace(
                 $r -> getRed(), $r -> getGreen(), $r -> getBlue(), $r -> getAlpha()
             );
         } else {
             if (is_string($r)) {
                 try {
-                    $c = new AP5L_Gfx_ColorSpace();
+                    $c = new ColorSpace();
                     $c -> setHex($r);
                     return $c;
-                } catch (AP5L_Gfx_Exception $e) {
+                } catch (Exception $e) {
                 }
             }
-            $c = new AP5L_Gfx_ColorSpace($r, $g, $b, $a);
+            $c = new ColorSpace($r, $g, $b, $a);
         }
         return $c;
     }
@@ -607,7 +608,7 @@ class AP5L_Gfx_ColorSpace extends AP5L_Php_InflexibleObject {
         } elseif ($quantum > 0) {
             $bands = round(1 / $quantum);
         } else {
-            throw new AP5L_Gfx_Exception($quantum . ' is an invalid posterization quantum.');
+            throw new Exception($quantum . ' is an invalid posterization quantum.');
         }
         if ($bands == 1) {
             // One band... everything is gray
@@ -683,8 +684,8 @@ class AP5L_Gfx_ColorSpace extends AP5L_Php_InflexibleObject {
      *
      * @param string All non-hex characters are filtered from the string. The
      * resulting string must have 3, 4, 6, or 8 digits.
-     * @throws AP5L_Gfx_Exception If the string is not valid hex.
-     * @return AP5L_Gfx_ColorSpace The current object.
+     * @throws Apl\Gfx\Exception If the string is not valid hex.
+     * @return Apl\Gfx\ColorSpace The current object.
      */
     function setHex($hex) {
         $clean = '';
@@ -723,7 +724,7 @@ class AP5L_Gfx_ColorSpace extends AP5L_Php_InflexibleObject {
             } break;
 
             default: {
-                throw new AP5L_Gfx_Exception('Unable to parse "' . $hex . '" as hex color.');
+                throw new Exception('Unable to parse "' . $hex . '" as hex color.');
             }
 
         }
@@ -737,7 +738,7 @@ class AP5L_Gfx_ColorSpace extends AP5L_Php_InflexibleObject {
     function setHsb($h, $s = 0, $b = 0) {
         if (is_array($h)) {
             if (count($h) < 3) {
-                throw new AP5L_Gfx_Exception(
+                throw new Exception(
                     'Array passed to ' . __FUNCTION__ . ' must have 3 elements.'
                 );
             }
@@ -764,7 +765,7 @@ class AP5L_Gfx_ColorSpace extends AP5L_Php_InflexibleObject {
     function setHsba($h, $s = 0, $b = 0, $a = 0) {
         if (is_array($h)) {
             if (count($h) < 4) {
-                throw new AP5L_Gfx_Exception(
+                throw new Exception(
                     'Array passed to ' . __FUNCTION__ . ' must have 4 elements.'
                 );
             }
@@ -802,7 +803,7 @@ class AP5L_Gfx_ColorSpace extends AP5L_Php_InflexibleObject {
     function setNamed($name, $alpha = 0) {
         $name = strtolower($name);
         if (! isset(self::$_namedColors[$name])) {
-            throw new AP5L_Gfx_Exception('Unknown named color: ' . $name);
+            throw new Exception('Unknown named color: ' . $name);
         }
         $this -> setRgbInt(self::$_namedColors[$name]);
         $this -> setAlpha($alpha);
@@ -822,7 +823,7 @@ class AP5L_Gfx_ColorSpace extends AP5L_Php_InflexibleObject {
     function setRgb($r, $g = 0, $b = 0) {
         if (is_array($r)) {
             if (count($r) < 3) {
-                throw new AP5L_Gfx_Exception(
+                throw new Exception(
                     'Array passed to ' . __FUNCTION__ . ' must have 3 elements.'
                 );
             }

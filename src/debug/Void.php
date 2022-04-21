@@ -7,14 +7,15 @@
  * @version $Id: Void.php 91 2009-08-21 02:45:29Z alan.langford@abivia.com $
  * @author Alan Langford <alan.langford@abivia.com>
  */
+namespace Apl\Debug;
 
 /**
  * A null diagnostic output class.
- * 
+ *
  * @package AP5L
  * @subpackage Debug
  */
-class AP5L_Debug_Void implements AP5L_DebugProvider {
+class Void implements \Apl\DebugProvider {
     static protected $_instance;
 
     function _write($data) {

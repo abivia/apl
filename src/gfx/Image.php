@@ -2,18 +2,19 @@
 /**
  * Image manipulation class.
  *
- * @package AP5L
+ * @package Apl
  * @subpackage Gfx
  * @license http://www.gnu.org/licenses/gpl-3.0.html GPLv3
  * @copyright 2007, Alan Langford
  * @version $Id: Image.php 100 2011-03-21 18:26:21Z alan.langford@abivia.com $
  * @author Alan Langford <alan.langford@abivia.com>
  */
-
+namespace Apl\Gfx;
+use \Apl\Math;
 /**
  * An object wrapper class for the GD image library
  */
-class AP5L_Gfx_Image extends AP5L_Php_InflexibleObject {
+class Image extends \Apl\Php\InflexibleObject {
 
     /**
      * Alpha blending mode.
@@ -32,14 +33,14 @@ class AP5L_Gfx_Image extends AP5L_Php_InflexibleObject {
     /**
      * The current draw colour.
      *
-     * @var AP5L_Gfx_ColorSpace
+     * @var Apl\Gfx\ColorSpace
      */
     protected $_drawColor;
 
     /**
      * The current fill colour.
      *
-     * @var AP5L_Gfx_ColorSpace
+     * @var Apl\Gfx\ColorSpace
      */
     protected $_fillColor;
 
@@ -53,7 +54,7 @@ class AP5L_Gfx_Image extends AP5L_Php_InflexibleObject {
     /**
      * Size of the image in pixels.
      *
-     * @var AP5L_Math_Point2d
+     * @var Apl\Math\Point2d
      */
     protected $_size;
     /**
@@ -83,9 +84,9 @@ class AP5L_Gfx_Image extends AP5L_Php_InflexibleObject {
     public $trouble = array();
 
     function __construct($x = null, $y = null) {
-        $this -> _size = new AP5L_Math_Point2d(0, 0);
-        $this -> _drawColor = AP5L_Gfx_ColorSpace::factory();
-        $this -> _fillColor = AP5L_Gfx_ColorSpace::factory();
+        $this -> _size = new Math\Point2d(0, 0);
+        $this -> _drawColor = ColorSpace::factory();
+        $this -> _fillColor = ColorSpace::factory();
         if (is_null($x)) {
             $this -> _im = 0;
         } else {
@@ -94,7 +95,7 @@ class AP5L_Gfx_Image extends AP5L_Php_InflexibleObject {
     }
 
     function __destruct() {
-        AP5L::getDebug() -> writeln('Destroy ' . $this -> _im);
+        \Apl::getDebug() -> writeln('Destroy ' . $this -> _im);
         if ($this -> _im) {
             imagedestroy($this -> _im);
             $this -> _im = 0;
@@ -102,30 +103,30 @@ class AP5L_Gfx_Image extends AP5L_Php_InflexibleObject {
     }
 
     /**
-     * Handle arguments that are either a AP5L_Gfx_ColorSpace or (r,g,b[,a])
+     * Handle arguments that are either a \Apl\Gfx\ColorSpace or (r,g,b[,a])
      */
     protected function _csArgs($args) {
         switch (count($args)) {
             case 1: {
-                if ($args[0] instanceof AP5L_Gfx_ColorSpace) {
+                if ($args[0] instanceof ColorSpace) {
                     $cs = $args[0];
                 } else {
-                    throw new AP5L_Gfx_Exception(
-                        'Expected AP5L_Gfx_ColorSpace object for first argument.'
+                    throw new Exception(
+                        'Expected ColorSpace object for first argument.'
                     );
                 }
             } break;
 
             case 3: {
-                $cs = new AP5L_Gfx_ColorSpace($args[0], $args[1], $args[2]);
+                $cs = new ColorSpace($args[0], $args[1], $args[2]);
             } break;
 
             case 4: {
-                $cs = new AP5L_Gfx_ColorSpace($args[0], $args[1], $args[2], $args[3]);
+                $cs = new ColorSpace($args[0], $args[1], $args[2], $args[3]);
             } break;
 
             default: {
-                throw new AP5L_Gfx_Exception(
+                throw new Exception(
                     'Incorrect arguments.'
                 );
             } break;
@@ -139,8 +140,8 @@ class AP5L_Gfx_Image extends AP5L_Php_InflexibleObject {
      *
      * @param array Array of arguments. Passed by reference; used arguments are
      * removed.
-     * @throws AP5L_Gfx_Exception When no parameter match is possible.
-     * @return array Array of (AP5L_Math_Point2d, angle).
+     * @throws Apl\Gfx\Exception When no parameter match is possible.
+     * @return array Array of (\Apl\Math\Point2d, angle).
      */
     protected function _directionArgs(&$args) {
         /*
@@ -148,26 +149,26 @@ class AP5L_Gfx_Image extends AP5L_Php_InflexibleObject {
             . ' n2=' .  is_numeric($args[2]) . ' n3=' .  is_numeric($args[3]) . '<br/>';
         echo '<pre>' . print_r($args, true) . '</pre>';
         */
-        if ($args[0] instanceof AP5L_Math_Point2d) {
+        if ($args[0] instanceof Math\Point2d) {
             if (count($args) < 2) {
-                throw new AP5L_Gfx_Exception(
-                    'AP5L_Math_Point2d parameter needs angle.'
+                throw new Exception(
+                    'Apl\Math\Point2d parameter needs angle.'
                 );
             }
             $c1 = array_shift($args);
             $angle = array_shift($args);
             if (! is_numeric($angle)) {
-                throw new AP5L_Gfx_Exception(
+                throw new Exception(
                     'Second parameter must be numeric'
                 );
             }
             $result = array($c1, $angle);
-        } elseif ($args[0] instanceof AP5L_Math_Vector2d) {
+        } elseif ($args[0] instanceof Math\Vector2d) {
             $vec = array_shift($args);
             $result = array($vec -> org, $veg -> getAngle());
         } elseif (count($args) >= 3 && is_numeric($args[0]) && is_numeric($args[1])
             && is_numeric($args[2])) {
-            $result = array(new AP5L_Math_Point2d($args[0], $args[1]), $args[2]);
+            $result = array(new Math\Point2d($args[0], $args[1]), $args[2]);
             array_splice($args, 0, 3);
         } else {
             $msg = 'Invalid parameters (#=' . count($args) . ') ';
@@ -175,7 +176,7 @@ class AP5L_Gfx_Image extends AP5L_Php_InflexibleObject {
                  $msg .= get_class($args[$ind])
                     ? get_class($args[$ind]) : $args[$ind] . ', ';
             }
-            throw new AP5L_Gfx_Exception($msg);
+            throw new Exception($msg);
         }
         return $result;
     }
@@ -191,7 +192,7 @@ class AP5L_Gfx_Image extends AP5L_Php_InflexibleObject {
     protected function _setAntialias($anti) {
         if ($this -> _im && function_exists('imageantialias')) {
             if (! @imageantialias($this -> _im, $anti)) {
-                throw new AP5L_Gfx_Exception('Failed in GD.');
+                throw new Exception('Failed in GD.');
             }
         }
         $was = $this -> _antiAlias;
@@ -209,21 +210,21 @@ class AP5L_Gfx_Image extends AP5L_Php_InflexibleObject {
      * are endpoints of a line and a vector is returned. In "box" mode, they are
      * the corners of a box. In "center" mode, the first point defines the
      * center of a box, the second point defines the size of the box.
-     * @throws AP5L_Gfx_Exception When no parameter match is possible.
-     * @return AP5L_Math_Vector2d|AP5L_Math_Box2d Originating at the first
+     * @throws \Apl\Gfx\Exception When no parameter match is possible.
+     * @return \Apl\Math\Vector2d|\Apl\Math\Box2d Originating at the first
      * point, terminating at the last. In box, center, and radius modes, te
      * enclosing box is returned.
      */
     protected function _twoPointArgs(&$args, $mode) {
-        if (AP5L::getDebug() -> isEnabled()) {
-            AP5L::getDebug() -> writeln(
+        if (\Apl::getDebug() -> isEnabled()) {
+            \Apl::getDebug() -> writeln(
                 'c=' . count($args)
                 . (count($args) > 0 ? ' n0=' . is_numeric($args[0]) : '')
                 . (count($args) > 1 ? ' n1=' . is_numeric($args[1]) : '')
                 . (count($args) > 2 ? ' n2=' .  is_numeric($args[2]) : '')
                 . (count($args) > 3 ? ' n3=' .  is_numeric($args[3]) : '')
             );
-            AP5L::getDebug() -> writeln('<pre>' . print_r($args, true) . '</pre>');
+            \Apl::getDebug() -> writeln('<pre>' . print_r($args, true) . '</pre>');
         }
         /*
          * Extract c1 and c2 (corner 1 and 2) from any valid combination of
@@ -231,11 +232,11 @@ class AP5L_Gfx_Image extends AP5L_Php_InflexibleObject {
          */
         $done = false;
         if (count($args) >= 2 && is_numeric($args[0]) && is_numeric($args[1])) {
-            $c1 = AP5L_Math_Point2d::factory($args[0], $args[1]);
+            $c1 = Math\Point2d::factory($args[0], $args[1]);
             array_splice($args, 0, 2);
-        } elseif ($args[0] instanceof AP5L_Math_Point2d) {
+        } elseif ($args[0] instanceof Math\Point2d) {
             $c1 = array_shift($args);
-        } elseif ($args[0] instanceof AP5L_Math_Vector2d) {
+        } elseif ($args[0] instanceof Math\Vector2d) {
             $c1 = $args[0] -> org;
             $c2 = $args[0] -> direction;
             array_shift($args);
@@ -246,49 +247,49 @@ class AP5L_Gfx_Image extends AP5L_Php_InflexibleObject {
                  $msg .= get_class($args[$ind])
                     ? get_class($args[$ind]) : $args[$ind] . ', ';
             }
-            throw new AP5L_Gfx_Exception($msg);
+            throw new Exception($msg);
         }
         if (! $done) {
             if (count($args) >= 2 && is_numeric($args[0]) && is_numeric($args[1])) {
-                $c2 = AP5L_Math_Point2d::factory($args[0], $args[1]);
+                $c2 = Math\Point2d::factory($args[0], $args[1]);
                 array_splice($args, 0, 2);
-            } elseif ($args[0] instanceof AP5L_Math_Point2d) {
+            } elseif ($args[0] instanceof Math\Point2d) {
                 $c2 = array_shift($args);
-            } elseif ($args[0] instanceof AP5L_Math_Vector2d) {
+            } elseif ($args[0] instanceof Math\Vector2d) {
                 $c2 = $args[0] -> org -> add($args[0] -> direction);
                 array_shift($args);
             } else {
-                throw new AP5L_Gfx_Exception(
-                    'Expected (int, int), AP5L_Math_Point2d, or AP5L_Math_Vector2d for second point.'
+                throw new Exception(
+                    'Expected (int, int), \Apl\Math\Point2d, or \Apl\Math\Vector2d for second point.'
                 );
             }
         }
         //---------------------------
         switch ($mode) {
             case 'line': {
-                $result = AP5L_Math_Vector2d::factory($c1, $c2 -> subtract($c1));
+                $result = Math\Vector2d::factory($c1, $c2 -> subtract($c1));
             }
             break;
 
             case 'box': {
-                $result = AP5L_Math_Box2d::factory($c1, $c2 -> subtract($c1));
+                $result = Math\Box2d::factory($c1, $c2 -> subtract($c1));
             }
             break;
 
             case 'center': {
-                $result = AP5L_Math_Box2d::factory($c1, $c2);
+                $result = Math\Box2d::factory($c1, $c2);
             }
             break;
 
             default : {
-                throw new AP5L_Gfx_Exception(
+                throw new Exception(
                     'Unexpected mode "' . $mode . '".'
                 );
             }
             break;
 
         }
-        AP5L::getDebug() -> writeln($result);
+        \Apl::getDebug() -> writeln($result);
         return $result;
     }
 
@@ -302,30 +303,30 @@ class AP5L_Gfx_Image extends AP5L_Php_InflexibleObject {
      * arc(xCenter, yCenter, xSize, ySize, degStart, degEnd[, border [, fill,
      * [style]]])
      *
-     * The border and fill parameters are AP5L_Gfx_ColorSpace objects, boolean,
-     * or missing. If provided as AP5L_Gfx_ColorSpace objects, they are used. If
+     * The border and fill parameters are \Apl\Gfx\ColorSpace objects, boolean,
+     * or missing. If provided as \AplGfx\ColorSpace objects, they are used. If
      * provided and false, no border and/or fill is drawn. If not provided or if
      * provided and true, then the current line and fill colors are used.
      *
-     * @throws AP5L_Gfx_Exception If the arguments are bad.
-     * @return AP5L_Gfx_Image The current image object.
+     * @throws \Apl\Gfx\Exception If the arguments are bad.
+     * @return \Apl\Gfx\Image The current image object.
      *
      */
     function &arc() {
         $args = func_get_args();
         if (func_num_args() < 3) {
-            throw new AP5L_Gfx_Exception(
+            throw new Exception(
                 'Insufficient arguments.'
             );
         }
         try {
             $vec = $this -> _twoPointArgs($args, 'center');
-        } catch (AP5L_Gfx_Exception $e) {
-            throw new AP5L_Gfx_Exception('ellipse: ' . $e -> getMessage());
+        } catch (Gfx\Exception $e) {
+            throw new Exception('ellipse: ' . $e -> getMessage());
         }
         // Look for start and end angles
         if (count($args) < 2) {
-            throw new AP5L_Gfx_Exception(
+            throw new Exception(
                 'Insufficient arguments.'
             );
         }
@@ -347,28 +348,28 @@ class AP5L_Gfx_Image extends AP5L_Php_InflexibleObject {
         } else {
             $style = 0;
         }
-        if (! $fill instanceof AP5L_Gfx_ColorSpace) {
+        if (! $fill instanceof ColorSpace) {
             if (is_bool($fill)) {
                 $fill = $fill ? $this -> _fillColor : null;
             } else {
-                throw new AP5L_Gfx_Exception(
-                    'Fill must have type boolean or AP5L_Gfx_ColorSpace'
+                throw new Exception(
+                    'Fill must have type boolean or \Apl\Gfx\ColorSpace'
                 );
             }
         }
         $sameAsFill = false;
-        if (! $border instanceof AP5L_Gfx_ColorSpace) {
+        if (! $border instanceof ColorSpace) {
             if (is_bool($border)) {
                 $sameAsFill = ! $border;
                 $border = $border ? $this -> _drawColor : $fill;
             } else {
-                throw new AP5L_Gfx_Exception(
-                    'Border must have type boolean or AP5L_Gfx_ColorSpace'
+                throw new Exception(
+                    'Border must have type boolean or \Apl\Gfx\ColorSpace'
                 );
             }
         }
         if (! $border) {
-            throw new AP5L_Gfx_Exception(
+            throw new Exception(
                 'Unable to determine border color.'
             );
         }
@@ -405,45 +406,45 @@ class AP5L_Gfx_Image extends AP5L_Php_InflexibleObject {
     /**
      * Copy from another image.
      *
-     * @param AP5L_Gfx_Image The image to copy from
-     * @param AP5L_Math_Vector2d Optional. An area in the source image that will
+     * @param \Apl\Gfx\Image The image to copy from
+     * @param \Apl\Math\Vector2d Optional. An area in the source image that will
      * be copied. If missing, the entire image will be used.
-     * @param AP5L_Math_Point2d|AP5L_Math_Vector2d Optional. The location where
+     * @param \Apl\Math\Point2d|\Apl\Math\Vector2d Optional. The location where
      * the copy will be placed. If a vector is provided, this defines the
      * destination area, which may invoke source scaling. If not provided,
      * @param array Options include scale="none|resize|resample"
-     * @throws AP5L_Gfx_Exception
-     * @return AP5L_Gfx_Image The current image object.
+     * @throws \Apl\Gfx\Exception
+     * @return \Apl\Gfx\Image The current image object.
      */
     function &copy($src, $from = null, $dest = null, $options = array()) {
         if ($from === null) {
-            $from = AP5L_Math_Vector2d::factory($src -> getSize());
+            $from = Math\Vector2d::factory($src -> getSize());
         }
         if ($dest === null) {
-            $dest = AP5L_Math_Vector2d::factory($this -> _size);
+            $dest = Math\Vector2d::factory($this -> _size);
         }
-        AP5L::getDebug() -> write('Copy from=' . $from . ' dest=' . $dest);
+        \Apl::getDebug() -> write('Copy from=' . $from . ' dest=' . $dest);
         $scaleMode = 'none';
-        if (! $from instanceof AP5L_Math_Vector2d) {
-            throw new AP5L_Gfx_Exception(
+        if (! $from instanceof Math\Vector2d) {
+            throw new Exception(
                 'copy: bad from argument ' . get_class($from) . '.'
             );
         }
-        if ($dest instanceof AP5L_Math_Point2d) {
+        if ($dest instanceof Math\Point2d) {
             $start = $dest;
-        } elseif ($dest instanceof AP5L_Math_Vector2d) {
+        } elseif ($dest instanceof Math\Vector2d) {
             // Look at scaling
             if ($dest -> direction != $from -> direction) {
                 $scaleMode = isset($options['scale']) ? $options['scale'] : 'resample';
             }
             $start = $dest -> org;
         } else {
-            throw new AP5L_Gfx_Exception(
+            throw new Exception(
                 'copy: bad dest argument ' . get_class($dest) . '.'
             );
         }
         if (! $this -> _im) {
-            throw new AP5L_Gfx_Exception(
+            throw new Exception(
                 'copy: Target image not created.'
             );
         }
@@ -480,7 +481,7 @@ class AP5L_Gfx_Image extends AP5L_Php_InflexibleObject {
             break;
         }
         if (! $result) {
-            throw new AP5L_Gfx_Exception(
+            throw new Exception(
                 __METHOD__ . ': Operation failed in GD library.'
             );
         }
@@ -490,20 +491,20 @@ class AP5L_Gfx_Image extends AP5L_Php_InflexibleObject {
     /**
      * Crop the image.
      *
-     * @param AP5L_Math_Vector2d An area in the source image that will
+     * @param \Apl\Math\Vector2d An area in the source image that will
      * be retained.
-     * @throws AP5L_Gfx_Exception
-     * @return AP5L_Gfx_Image The current image object.
+     * @throws \Apl\Gfx\Exception
+     * @return \Apl\Gfx\Image The current image object.
      */
     function &crop($from) {
-        AP5L::getDebug() -> write('Crop area=' . $from);
-        if (! $from instanceof AP5L_Math_Vector2d) {
-            throw new AP5L_Gfx_Exception(
+        \Apl::getDebug() -> write('Crop area=' . $from);
+        if (! $from instanceof Math\Vector2d) {
+            throw new Exception(
                 __METHOD__ . ': bad from argument ' . get_class($from) . '.'
             );
         }
         if (! $this -> _im) {
-            throw new AP5L_Gfx_Exception(
+            throw new Exception(
                 __METHOD__ . ': Target image not created.'
             );
         }
@@ -515,7 +516,7 @@ class AP5L_Gfx_Image extends AP5L_Php_InflexibleObject {
         );
         $result = imagecrop($this -> _im, $rect);
         if (! $result) {
-            throw new AP5L_Gfx_Exception(
+            throw new Exception(
                 __METHOD__ . ': Operation failed in GD library.'
             );
         }
@@ -529,12 +530,12 @@ class AP5L_Gfx_Image extends AP5L_Php_InflexibleObject {
      * representing the x size. If not provided, the internal image size is used.
      * @param int|float The y size, truncated to an integer. If not provided,
      * the internal image size is used.
-     * @throws AP5L_Gfx_Exception
-     * @return AP5L_Gfx_Image The current image object.
+     * @throws \Apl\Gfx\Exception
+     * @return \Apl\Gfx\Image The current image object.
      */
     function &create($x = null, $y = null) {
         if ($this -> _im) {
-            throw new AP5L_Gfx_Exception(
+            throw new Exception(
                 'create: Failed; image exists.'
             );
         }
@@ -549,21 +550,21 @@ class AP5L_Gfx_Image extends AP5L_Php_InflexibleObject {
             // Handle arrays, points, boxes, and nothing
             if (is_null($x)) {
                 // we use the _size without modification
-            } elseif ($x instanceof AP5L_Math_Point2d) {
+            } elseif ($x instanceof Math\Point2d) {
                 $this -> _size = $x;
-            } elseif ($x instanceof AP5L_Math_Box2d) {
+            } elseif ($x instanceof Math\Box2d) {
                 $this -> _size = $x -> getSize();
             } elseif (is_array($x)) {
                 $this -> _size -> x = isset($x['x']) ? $x['x'] : 0;
                 $this -> _size -> y = isset($x['y']) ? $x['y'] : 0;
             }
         }
-        AP5L::getDebug() -> writeln(
+        \Apl::getDebug() -> writeln(
             'create image: ' . $this -> _size -> x . ' by ' . $this -> _size -> y
         );
         $this -> _im = @imagecreatetruecolor($this -> _size -> x, $this -> _size -> y);
         if (! $this -> _im) {
-            throw new AP5L_Gfx_Exception(
+            throw new Exception(
                 'Image create ('
                     . $this -> _size -> x . ', ' . $this -> _size -> y
                 . ') failed.'
@@ -578,7 +579,7 @@ class AP5L_Gfx_Image extends AP5L_Php_InflexibleObject {
     /**
      * Destroy an allocated image.
      *
-     * @return AP5L_Gfx_Image The current image object.
+     * @return \Apl\Gfx\Image The current image object.
      */
     function &destroy() {
         if ($this -> _im) {
@@ -597,26 +598,26 @@ class AP5L_Gfx_Image extends AP5L_Php_InflexibleObject {
      *
      * ellipse(xCenter, yCenter, xSize, ySize[, border [, fill]])
      *
-     * The border and fill parameters are AP5L_Gfx_ColorSpace objects, boolean,
-     * or missing. If provided as AP5L_Gfx_ColorSpace objects, they are used. If
+     * The border and fill parameters are \Apl\Gfx\ColorSpace objects, boolean,
+     * or missing. If provided as \Apl\Gfx\ColorSpace objects, they are used. If
      * provided and false, no border and/or fill is drawn. If not provided or if
      * provided and true, then the current line and fill colors are used.
      *
-     * @throws AP5L_Gfx_Exception
-     * @return AP5L_Gfx_Image The current image object.
+     * @throws \Apl\Gfx\Exception
+     * @return \Apl\Gfx\Image The current image object.
      *
      */
     function ellipse() {
         $args = func_get_args();
         if (! func_num_args()) {
-            throw new AP5L_Gfx_Exception(
+            throw new Exception(
                 'Insufficient arguments.'
             );
         }
         try {
             $box = $this -> _twoPointArgs($args, 'center');
-        } catch (AP5L_Gfx_Exception $e) {
-            throw new AP5L_Gfx_Exception('ellipse: ' . $e -> getMessage());
+        } catch (Gfx\Exception $e) {
+            throw new Exception('ellipse: ' . $e -> getMessage());
         }
         // We should now have border / fill specifiers
         if (count($args)) {
@@ -629,42 +630,42 @@ class AP5L_Gfx_Image extends AP5L_Php_InflexibleObject {
         } else {
             $fill = $this -> _fillColor;
         }
-        if (! $fill instanceof AP5L_Gfx_ColorSpace) {
+        if (! $fill instanceof ColorSpace) {
             if (is_bool($fill)) {
                 $fill = $fill ? $this -> _fillColor : null;
             } else {
-                throw new AP5L_Gfx_Exception(
-                    'Fill must have type boolean or AP5L_Gfx_ColorSpace'
+                throw new Exception(
+                    'Fill must have type boolean or \Apl\Gfx\ColorSpace'
                 );
             }
         }
         $sameAsFill = false;
-        if (! $border instanceof AP5L_Gfx_ColorSpace) {
+        if (! $border instanceof ColorSpace) {
             if (is_bool($border)) {
                 $sameAsFill = ! $border;
                 $border = $border ? $this -> _drawColor : $fill;
             } else {
-                throw new AP5L_Gfx_Exception(
-                    'Border must have type boolean or AP5L_Gfx_ColorSpace'
+                throw new Exception(
+                    'Border must have type boolean or \Apl\Gfx\ColorSpace'
                 );
             }
         }
         if (! $border) {
-            throw new AP5L_Gfx_Exception(
+            throw new Exception(
                 'Unable to determine border color.'
             );
         }
         $bc = $this -> colorAllocate($border);
-        if (AP5L::getDebug() -> isEnabled()) {
-            AP5L::getDebug() -> writeln('im:<pre>' . print_r($this -> _im, true) . '</pre>');
-            AP5L::getDebug() -> writeln($box);
-            AP5L::getDebug() -> writeln(
+        if (\Apl::getDebug() -> isEnabled()) {
+            \Apl::getDebug() -> writeln('im:<pre>' . print_r($this -> _im, true) . '</pre>');
+            \Apl::getDebug() -> writeln($box);
+            \Apl::getDebug() -> writeln(
                 'Border=' . $border . ' Fill=' . $fill
                 . ' sameasfill=' . $sameAsFill
             );
-            AP5L::getDebug() -> writeln('border:<pre>' . print_r($border, true) . '</pre>');
-            AP5L::getDebug() -> writeln('fill:<pre>' . print_r($fill, true) . '</pre>');
-            AP5L::getDebug() -> writeln(
+            \Apl::getDebug() -> writeln('border:<pre>' . print_r($border, true) . '</pre>');
+            \Apl::getDebug() -> writeln('fill:<pre>' . print_r($fill, true) . '</pre>');
+            \Apl::getDebug() -> writeln(
                 'ellipse ' . $box -> org -> x . ', ' . $box -> org -> y . ', ' .
                 $box -> direction -> x . ', ' . $box -> direction -> y . ', ' . $bc);
         }
@@ -687,7 +688,7 @@ class AP5L_Gfx_Image extends AP5L_Php_InflexibleObject {
                 $box -> direction -> x, $box -> direction -> y, $bc);
         }
         if (! $result) {
-            throw new AP5L_Gfx_Exception(
+            throw new Exception(
                 __METHOD__ . ': Operation failed in GD library.'
             );
         }
@@ -703,18 +704,18 @@ class AP5L_Gfx_Image extends AP5L_Php_InflexibleObject {
      * @param integer|float|string Y dimension, if first argument is X
      * dimension; Optional image type if first argument is a path. Not required
      * if first argument supplies X and Y dimensions.
-     * @return AP5L_Gfx_Image The new image object.
+     * @return \Apl\Gfx\Image The new image object.
      */
     static function &factory($xName, $yType = null) {
         if (is_string($xName) && !is_numeric($xName)) {
-            AP5L::getDebug() -> writeln(__METHOD__ . ': read image: ' . $xName);
-            $im = new AP5L_Gfx_Image();
+            \Apl::getDebug() -> writeln(__METHOD__ . ': read image: ' . $xName);
+            $im = new Image();
             $im -> read($xName, $yType);
         } else {
-            AP5L::getDebug() -> writeln(
+            \Apl::getDebug() -> writeln(
                 __METHOD__ . ': create image: ' . $xName . ' by ' . $yType
             );
-            $im = new AP5L_Gfx_Image($xName, $yType);
+            $im = new Image($xName, $yType);
         }
         return $im;
     }
@@ -723,16 +724,16 @@ class AP5L_Gfx_Image extends AP5L_Php_InflexibleObject {
      * Apply filter to image.
      *
      * @param int Filter types as defined in GD library.
-     * @param mixed Integer when filter requres an argument. AP5L_Gfx_ColorSpace
+     * @param mixed Integer when filter requires an argument. \Apl\Gfx\ColorSpace
      * or array of integer (r, g, b) if filter is IMG_FILTER_COLORIZE.
-     * @throws AP5L_Gfx_Exception If colorize parameter isn't valid, or if operation
+     * @throws \Apl\Gfx\Exception If colorize parameter isn't valid, or if operation
      * failed.
-     * @return AP5L_Gfx_Image The current image object.
+     * @return \Apl\Gfx\Image The current image object.
      */
     function filter($filterType, $param = null) {
         switch ($filterType) {
             case IMG_FILTER_COLORIZE: {
-                if ($param instanceof AP5L_Gfx_ColorSpace) {
+                if ($param instanceof ColorSpace) {
                     $result = imagefilter(
                         IMG_FILTER_COLORIZE,
                         $param -> getRedInt(),
@@ -744,8 +745,8 @@ class AP5L_Gfx_Image extends AP5L_Php_InflexibleObject {
                         IMG_FILTER_COLORIZE, $param[0], $param[1], $param[2]
                     );
                 } else {
-                    throw new AP5L_Gfx_Exception(
-                        'Colorize filter requires AP5L_Gfx_ColorSpace or RGB array parameter.'
+                    throw new Exception(
+                        'Colorize filter requires \Apl\Gfx\ColorSpace or RGB array parameter.'
                     );
                 }
             }
@@ -756,7 +757,7 @@ class AP5L_Gfx_Image extends AP5L_Php_InflexibleObject {
             }
         }
         if (! $result) {
-            throw new AP5L_Gfx_Exception(
+            throw new Exception(
                 'Operation failed in GD library'
                 . ($this -> _im ? '' : ' (image not created)') . '.'
             );
@@ -785,19 +786,19 @@ class AP5L_Gfx_Image extends AP5L_Php_InflexibleObject {
     /**
      * Get color of a pixel as a ColorSpace object.
      *
-     * @param int|AP5L_Math_Point2d The point to read or the x coordinate of the
+     * @param int|\Apl\Math\Point2d The point to read or the x coordinate of the
      * point.
      * @param int The y coordinate, required if x is an integer.
-     * @return AP5L_Gfx_ColorSpace|boolean The image color at the specified
+     * @return \Apl\Gfx\ColorSpace|boolean The image color at the specified
      * coordinates. False if the coordinate is invalid.
      */
     function &getPixel($x, $y = null) {
-        if ($x instanceof AP5L_Math_Point2d) {
+        if ($x instanceof Math\Point2d) {
             $c = imagecolorat($this -> _im, $x -> x, $x -> y);
         } else {
             $c = imagecolorat($this -> _im, $x, $y);
         }
-        $cs = new AP5L_Gfx_ColorSpace();
+        $cs = new ColorSpace();
         $cs -> setRgbInt($c);
         return $cs;
     }
@@ -805,13 +806,13 @@ class AP5L_Gfx_Image extends AP5L_Php_InflexibleObject {
     /**
      * Get color of a pixel as a packed integer.
      *
-     * @param int|AP5L_Math_Point2d The point to read or the x coordinate of the
+     * @param int|\Apl\Math\Point2d The point to read or the x coordinate of the
      * point.
      * @param int The y coordinate, required if x is an integer.
      * @return int|boolean The image color. False if the coordinate is invalid.
      */
     function getPixelInt($x, $y = null) {
-        if ($x instanceof AP5L_Math_Point2d) {
+        if ($x instanceof \Apl\Math\Point2d) {
             return imagecolorat($this -> _im, $x -> x, $x -> y);
         }
         return imagecolorat($this -> _im, $x, $y);
@@ -820,7 +821,7 @@ class AP5L_Gfx_Image extends AP5L_Php_InflexibleObject {
     /**
      * Get the image size.
      *
-     * @return AP5L_Math_Point2d The image dimensions.
+     * @return \Apl\Math\Point2d The image dimensions.
      */
     function getSize() {
         return $this -> _size;
@@ -830,7 +831,7 @@ class AP5L_Gfx_Image extends AP5L_Php_InflexibleObject {
      * Get the bounding box of the last text operation (see
      * {@see text()}.
      *
-     * @return array Four AP5L_Math_Point2d objects that define the box.
+     * @return array Four \Apl\Math\Point2d objects that define the box.
      */
     function getTextBox() {
         return $this -> _textLocn;
@@ -854,23 +855,23 @@ class AP5L_Gfx_Image extends AP5L_Php_InflexibleObject {
      *
      * line(x1, y1, x2, y2[, color])
      *
-     * The color parameter is a AP5L_Gfx_ColorSpace object. If missing, the
+     * The color parameter is a \Apl\Gfx\ColorSpace object. If missing, the
      * current line color is used.
      *
-     * @throws AP5L_Gfx_Exception
-     * @return AP5L_Gfx_Image The current image object.
+     * @throws \Apl\Gfx\Exception
+     * @return \Apl\Gfx\Image The current image object.
      */
     function &line() {
         $args = func_get_args();
         if (! func_num_args()) {
-            throw new AP5L_Gfx_Exception(
+            throw new Exception(
                 'Insufficient arguments.'
             );
         }
         try {
             $vec = $this -> _twoPointArgs($args, 'line');
-        } catch (AP5L_Gfx_Exception $e) {
-            throw new AP5L_Gfx_Exception('line: ' . $e -> getMessage());
+        } catch (Gfx\Exception $e) {
+            throw new Exception('line: ' . $e -> getMessage());
         }
         // We should now have an optional line color
         if (count($args)) {
@@ -878,9 +879,9 @@ class AP5L_Gfx_Image extends AP5L_Php_InflexibleObject {
         } else {
             $draw = $this -> _drawColor;
         }
-        if (! $draw instanceof AP5L_Gfx_ColorSpace) {
-            throw new AP5L_Gfx_Exception(
-                'Line color must have type AP5L_Gfx_ColorSpace'
+        if (! $draw instanceof ColorSpace) {
+            throw new Exception(
+                'Line color must have type \Apl\Gfx\ColorSpace'
             );
         }
         $dc = $this -> colorAllocate($draw);
@@ -893,7 +894,7 @@ class AP5L_Gfx_Image extends AP5L_Php_InflexibleObject {
         $result = imageline($this -> _im, $vec -> org -> x, $vec -> org -> y,
             $end -> x, $end -> y, $dc);
         if (! $result) {
-            throw new AP5L_Gfx_Exception(
+            throw new Exception(
                 __METHOD__ . ': Operation failed in GD library.'
             );
         }
@@ -906,12 +907,12 @@ class AP5L_Gfx_Image extends AP5L_Php_InflexibleObject {
      * This method takes a mask image, and an overlay image or color. It applies
      * the overlay pixel by pixel, in accordance with the value in the mask.
      *
-     * @param AP5L_Math_Point2d The start position.
-     * @param AP5L_Gfx_Image A mask. The mask is assumed to be monochrome (only
+     * @param \Apl\Math\Point2d The start position.
+     * @param \Apl\Gfx\Image A mask. The mask is assumed to be monochrome (only
      * the blue component is used). The color value defines the percentage of
      * the overlay image that will be applied.
-     * @param AP5L_Gfx_Image|AP5L_Gfx_ColorSpace|int A mask image or color.
-     * @return AP5L_Gfx_Image The current image object.
+     * @param \Apl\Gfx\Image|\Apl\Gfx\ColorSpace|int A mask image or color.
+     * @return \Apl\Gfx\Image The current image object.
      */
     function &mask($dest, $mask, $overlay) {
         $im = $this -> _im;
@@ -919,10 +920,10 @@ class AP5L_Gfx_Image extends AP5L_Php_InflexibleObject {
         $oy = $dest -> y;
         $ms = $mask -> getSize();
         $mi = $mask -> getImageHandle();
-        if ($overlay instanceof AP5L_Gfx_Image) {
+        if ($overlay instanceof Image) {
             $oi = $overlay -> getImageHandle();
             $oc = 0;
-        } elseif ($overlay instanceof AP5L_Gfx_ColorSpace) {
+        } elseif ($overlay instanceof ColorSpace) {
             $oi = 0;
             $oc = $overlay -> getRgbaInt();
         } else {
@@ -934,7 +935,7 @@ class AP5L_Gfx_Image extends AP5L_Php_InflexibleObject {
                 if ($oi) {
                     $oc = imagecolorat($oi, $x, $y);
                 }
-                $color = AP5L_Gfx_ColorSpace::rgbaIntBlend(
+                $color = ColorSpace::rgbaIntBlend(
                     imagecolorat($im, $ox + $x, $oy + $y),
                     $oc,
                     $pct
@@ -948,10 +949,10 @@ class AP5L_Gfx_Image extends AP5L_Php_InflexibleObject {
     /**
      * Merge another image into this one.
      *
-     * @param AP5L_Gfx_Image The image to merge from
-     * @param AP5L_Math_Vector2d Optional. An area in the source image that will
+     * @param \Apl\Gfx\Image The image to merge from
+     * @param \Apl\Math\Vector2d Optional. An area in the source image that will
      * be copied. If missing, the entire image is assumed.
-     * @param AP5L_Math_Point2d|AP5L_Math_Vector2d Optional. The location where
+     * @param \Apl\Math\Point2d|\Apl\Math\Vector2d Optional. The location where
      * the copy will be placed. If a vector is provided, this defines the
      * destination area, which may invoke source scaling. If missing, the entire
      * image area is assumed.
@@ -964,44 +965,44 @@ class AP5L_Gfx_Image extends AP5L_Php_InflexibleObject {
      * </li><li>"gray": If set, the destination area is converted to grayscale
      * before copying, thus preserving the hue of the source image.
      * </li></ul>
-     * @throws AP5L_Gfx_Exception On bad arguments or operation failure.
-     * @return AP5L_Gfx_Image The current image object.
+     * @throws \Apl\Gfx\Exception On bad arguments or operation failure.
+     * @return \Apl\Gfx\Image The current image object.
      */
     function &merge($src, $from = null, $dest = null, $options = array()) {
         $scaleMode = 'none';
         if ($from === null) {
-            $from = AP5L_Math_Vector2d::factory($src -> getSize());
+            $from = Math\Vector2d::factory($src -> getSize());
         }
         if ($dest === null) {
-            $dest = AP5L_Math_Vector2d::factory($this -> _size);
+            $dest = Math\Vector2d::factory($this -> _size);
         }
-        AP5L::getDebug() -> writeln('Merge from=' . $from . ' dest=' . $dest);
-        if (! $from instanceof AP5L_Math_Vector2d) {
-            throw new AP5L_Gfx_Exception(
+        \Apl::getDebug() -> writeln('Merge from=' . $from . ' dest=' . $dest);
+        if (! $from instanceof Math\Vector2d) {
+            throw new Exception(
                 'Bad from argument ' . get_class($from) . '.'
             );
         }
-        if ($dest instanceof AP5L_Math_Point2d) {
+        if ($dest instanceof Math\Point2d) {
             $start = $dest;
-        } elseif ($dest instanceof AP5L_Math_Vector2d) {
+        } elseif ($dest instanceof Math\Vector2d) {
             // Look at scaling
             if (!$dest -> direction -> equals($from -> direction)) {
                 $scaleMode = isset($options['scale']) ? $options['scale'] : 'resample';
             }
             $start = $dest -> org;
         } else {
-            throw new AP5L_Gfx_Exception(
+            throw new Exception(
                 'Bad dest argument ' . get_class($dest) . '.'
             );
         }
         if (! $this -> _im) {
-            throw new AP5L_Gfx_Exception(
+            throw new Exception(
                 'Target image not created.'
             );
         }
         $srcImg = $src -> getImageHandle();
         $srcMixPct = isset($options['percent']) ? $options['percent'] : 100;
-        AP5L::getDebug() -> writeln(
+        \Apl::getDebug() -> writeln(
             'Merge scalemode=' . $scaleMode
             . ' from=' . $srcImg . ' to=' . $this -> _im
             . ' dx=' . $start -> x . ' dy=' . $start -> y
@@ -1016,7 +1017,7 @@ class AP5L_Gfx_Image extends AP5L_Php_InflexibleObject {
              */
             $tempImg = imagecreatetruecolor($dest -> getSizeX(), $dest -> getSizeY());
             if (! $tempImg) {
-                throw new AP5L_Gfx_Exception('Unable to create intermediate image.');
+                throw new Exception('Unable to create intermediate image.');
             }
             if ($scaleMode == 'resize') {
                 $result = imagecopyresized(
@@ -1036,10 +1037,10 @@ class AP5L_Gfx_Image extends AP5L_Php_InflexibleObject {
                 );
             }
             if (! $result) {
-                throw new AP5L_Gfx_Exception('Failed while scaling to intermediate image.');
+                throw new Exception('Failed while scaling to intermediate image.');
             }
             $srcImg = $tempImg;
-            AP5L::getDebug() -> writeln('Merge: new from=' . $srcImg);
+            \Apl::getDebug() -> writeln('Merge: new from=' . $srcImg);
         }
         if (isset($options['gray']) && $options['gray']) {
             $result = imagecopymergegray(
@@ -1059,7 +1060,7 @@ class AP5L_Gfx_Image extends AP5L_Php_InflexibleObject {
             );
         }
         if (! $result) {
-            throw new AP5L_Gfx_Exception(
+            throw new Exception(
                 'Operation failed in GD library'
                 . ($this -> _im ? '' : ' (image not created)') . '.'
             );
@@ -1071,8 +1072,8 @@ class AP5L_Gfx_Image extends AP5L_Php_InflexibleObject {
      * Output the image to the browser.
      *
      * @param string Image type.
-     * @throws AP5L_Gfx_Exception
-     * @return AP5L_Gfx_Image The current image object.
+     * @throws \Apl\Gfx\Exception
+     * @return \Apl\Gfx\Image The current image object.
      */
     function &output($type = 'png') {
         switch (strtolower($type)) {
@@ -1082,7 +1083,7 @@ class AP5L_Gfx_Image extends AP5L_Php_InflexibleObject {
             break;
 
             default: {
-                throw new AP5L_Gfx_Exception(' type "' . $type . '" not supported.');
+                throw new Exception(' type "' . $type . '" not supported.');
             }
             break;
         }
@@ -1096,14 +1097,14 @@ class AP5L_Gfx_Image extends AP5L_Php_InflexibleObject {
      * @param int Optional. One of the IMAGETYPE_ constants defined in the
      * GD library, or a type string. Defined type strings are "string" and
      * "string.base64".
-     * @throws AP5L_Gfx_Exception
-     * @return AP5L_Gfx_Image The current image object.
+     * @throws \Apl\Gfx\Exception
+     * @return \Apl\Gfx\Image The current image object.
      */
     function &read($path, $type = false) {
         if (! $type) {
             $info = @getimagesize($path);
             if (! $info) {
-                throw new AP5L_Gfx_Exception(
+                throw new Exception(
                     'read: "'. $path . '" is not an image.'
                 );
             }
@@ -1137,13 +1138,13 @@ class AP5L_Gfx_Image extends AP5L_Php_InflexibleObject {
             }
             break;
             default: {
-                throw new AP5L_Gfx_Exception(
+                throw new Exception(
                     'read: unsupported image file type ' . $type
                 );
             }
         }
         if (! $this -> _im) {
-            throw new AP5L_Gfx_Exception(
+            throw new Exception(
                 'read failed: ' . $path
             );
         }
@@ -1176,26 +1177,26 @@ class AP5L_Gfx_Image extends AP5L_Php_InflexibleObject {
      *
      * rectangle(x1, y1, x2, y2[, border [, fill]])
      *
-     * The border and fill parameters are AP5L_Gfx_ColorSpace objects, boolean,
-     * or missing. If provided as AP5L_Gfx_ColorSpace objects, they are used. If
+     * The border and fill parameters are \Apl\Gfx\ColorSpace objects, boolean,
+     * or missing. If provided as \Apl\Gfx\ColorSpace objects, they are used. If
      * provided and false, no border and/or fill is drawn. If not provided or if
      * provided and true, then the current line and fill colors are used.
      *
-     * @throws AP5L_Gfx_Exception
-     * @return AP5L_Gfx_Image The current image object.
+     * @throws \Apl\Gfx\Exception
+     * @return \Apl\Gfx\Image The current image object.
      */
     function &rectangle() {
         $args = func_get_args();
         if (! func_num_args()) {
-            throw new AP5L_Gfx_Exception(
+            throw new Exception(
                 'Insufficient arguments.'
             );
         }
         try {
             $box = $this -> _twoPointArgs($args, 'box');
             $end = $box -> getEnd();
-        } catch (AP5L_Gfx_Exception $e) {
-            throw new AP5L_Gfx_Exception('rectangle: ' . $e -> getMessage());
+        } catch (Gfx\Exception $e) {
+            throw new Exception('rectangle: ' . $e -> getMessage());
         }
         // We should now have border / fill specifiers
         if (count($args)) {
@@ -1208,33 +1209,33 @@ class AP5L_Gfx_Image extends AP5L_Php_InflexibleObject {
         } else {
             $fill = $this -> _fillColor;
         }
-        if (! $fill instanceof AP5L_Gfx_ColorSpace) {
+        if (! $fill instanceof ColorSpace) {
             if (is_bool($fill)) {
                 $fill = $fill ? $this -> _fillColor : null;
             } else {
-                throw new AP5L_Gfx_Exception(
-                    'Fill must have type boolean or AP5L_Gfx_ColorSpace.'
+                throw new Exception(
+                    'Fill must have type boolean or \Apl\Gfx\ColorSpace.'
                 );
             }
         }
         $sameAsFill = false;
-        if (! $border instanceof AP5L_Gfx_ColorSpace) {
+        if (! $border instanceof ColorSpace) {
             if (is_bool($border)) {
                 $sameAsFill = ! $border;
                 $border = $border ? $this -> _drawColor : $fill;
             } else {
-                throw new AP5L_Gfx_Exception(
-                    'Border must have type boolean or AP5L_Gfx_ColorSpace'
+                throw new Exception(
+                    'Border must have type boolean or Apl\Gfx\ColorSpace'
                 );
             }
         }
         if (! $border) {
-            throw new AP5L_Gfx_Exception(
+            throw new Exception(
                 'Unable to determine border color.'
             );
         }
         $bc = $this -> colorAllocate($border);
-        $debug = &AP5L::getDebug();
+        $debug = &\Apl::getDebug();
         if ($debug -> isEnabled()) {
             $dbh = $debug -> getHandle();
             $debug -> writeln('im:' . print_r($this -> _im, true), $dbh);
@@ -1266,7 +1267,7 @@ class AP5L_Gfx_Image extends AP5L_Php_InflexibleObject {
                 $end -> x, $end -> y, $bc);
         }
         if (! $result) {
-            throw new AP5L_Gfx_Exception(
+            throw new Exception(
                 __METHOD__ . ': Operation failed in GD library.'
             );
         }
@@ -1282,17 +1283,17 @@ class AP5L_Gfx_Image extends AP5L_Php_InflexibleObject {
      * combined alpha values.
      *
      * @param boolean Alpha blending mode.
-     * @return AP5L_Gfx_Image The current image object.
+     * @return \Apl\Gfx\Image The current image object.
      */
     function &setAlphaBlending($blend = false) {
         $this -> _alphaBlendMode = $blend;
         if ($this -> _im) {
-            AP5L::getDebug() -> writeln(
+            \Apl::getDebug() -> writeln(
                 'Alpha blend ' . ($blend ? 'T' : 'F') . ' for ' . $this -> _im
             );
             $result = @imagealphablending($this -> _im, $blend);
             if (! $result) {
-                throw new AP5L_Gfx_Exception('Unable to set alpha blending.');
+                throw new Exception('Unable to set alpha blending.');
             }
         }
         return $this;
@@ -1302,12 +1303,12 @@ class AP5L_Gfx_Image extends AP5L_Php_InflexibleObject {
      * Set image anitaliasing property.
      *
      * @param boolean Anti-alias flag.
-     * @throws AP5L_Gfx_Exception
-     * @return AP5L_Gfx_Image The current image object.
+     * @throws \Apl\Gfx\Exception
+     * @return \Apl\Gfx\Image The current image object.
      */
     function &setAntialias($anti) {
         if (! function_exists('imageantialias')) {
-            throw new AP5L_Gfx_Exception('Bundled version of GD is required.');
+            throw new Exception('Bundled version of GD is required.');
         }
         $this -> _setAntialias($anti);
         return $this;
@@ -1316,15 +1317,15 @@ class AP5L_Gfx_Image extends AP5L_Php_InflexibleObject {
     /**
      * Set the drawing color.
      *
-     * Expects a AP5L_Gfx_ColorSpace object or r[, g, b [, alpha]].
-     * See {@see AP5L_Gfx_ColorSpace::factory()} for details.
+     * Expects a \Apl\Gfx\ColorSpace object or r[, g, b [, alpha]].
+     * See {@see \Apl\Gfx\ColorSpace::factory()} for details.
      *
-     * @return AP5L_Gfx_Image The current image object.
+     * @return \Apl\Gfx\Image The current image object.
      */
     function &setDrawColor() {
-        $cs = AP5L_Gfx_ColorSpace::factory(func_get_args());
+        $cs = ColorSpace::factory(func_get_args());
         if (! $cs) {
-            throw new AP5L_Gfx_Exception(__METHOD__ . ': Invalid color.');
+            throw new Exception(__METHOD__ . ': Invalid color.');
         }
         $this -> _drawColor = $cs;
         return $this;
@@ -1333,15 +1334,15 @@ class AP5L_Gfx_Image extends AP5L_Php_InflexibleObject {
     /**
      * Set the fill color.
      *
-     * Expects a AP5L_Gfx_ColorSpace object or r[, g, b [, alpha]].
-     * See {@see AP5L_Gfx_ColorSpace::factory()} for details.
+     * Expects a \Apl\Gfx\ColorSpace object or r[, g, b [, alpha]].
+     * See {@see \Apl\Gfx\ColorSpace::factory()} for details.
      *
-     * @return AP5L_Gfx_Image The current image object.
+     * @return \Apl\Gfx\Image The current image object.
      */
     function &setFillColor() {
-        $cs = AP5L_Gfx_ColorSpace::factory(func_get_args());
+        $cs = ColorSpace::factory(func_get_args());
         if (! $cs) {
-            throw new AP5L_Gfx_Exception(__METHOD__ . ': Invalid color.');
+            throw new Exception(__METHOD__ . ': Invalid color.');
         }
         $this -> _fillColor = $cs;
         return $this;
@@ -1353,15 +1354,15 @@ class AP5L_Gfx_Image extends AP5L_Php_InflexibleObject {
      * @param mixed If a point class is provided, the X and Y coordinates
      * of the pixel to be set. Otherwise, this is the X coordinate.
      * @param mixed If the first parameter is a point, this is a
-     * AP5L_Gfx_ColorSpace object, if the first parameter is scalar, this
+     * \Apl\Gfx\ColorSpace object, if the first parameter is scalar, this
      * is the Y coordinate.
-     * @param AP5L_Gfx_ColorSpace Optional. Not required if the first
+     * @param \Apl\Gfx\ColorSpace Optional. Not required if the first
      * argument is a point.
-     * @throws AP5L_Gfx_Exception
-     * @return AP5L_Gfx_Image The current image object.
+     * @throws \Apl\Gfx\Exception
+     * @return \Apl\Gfx\Image The current image object.
      */
     function &setPixel($x, $yColor, $color = null) {
-        if ($x instanceof AP5L_Math_Point2d) {
+        if ($x instanceof Math\Point2d) {
             $color = $yColor;
             $y = $x -> y;
             $x = $x -> x;
@@ -1371,12 +1372,12 @@ class AP5L_Gfx_Image extends AP5L_Php_InflexibleObject {
         if ($color === null) {
             $color = $this -> _drawColor;
         }
-        if ($color instanceof AP5L_Gfx_ColorSpace) {
+        if ($color instanceof ColorSpace) {
             $color = $color -> getRgbaInt();
         }
         $result = imagesetpixel($this -> _im, $x, $y, $color);
         if (! $result) {
-            throw new AP5L_Gfx_Exception(
+            throw new Exception(
                 __METHOD__ . ': Operation failed in GD library.'
             );
         }
@@ -1405,7 +1406,7 @@ class AP5L_Gfx_Image extends AP5L_Php_InflexibleObject {
      */
     static function setWriteOption($type, $option, $value) {
         if (!isset(self::$_writeOptions[strtolower($type)])) {
-            throw new AP5L_Gfx_Exception(
+            throw new Exception(
                 __METHOD__ . ': Unrecognized extension: ' . $type . '.'
             );
         }
@@ -1421,15 +1422,15 @@ class AP5L_Gfx_Image extends AP5L_Php_InflexibleObject {
      *
      * text(x, y, angle,
      *
-     * @throws AP5L_Gfx_Exception
-     * @return AP5L_Gfx_Image The current image object.
+     * @throws \Apl\Gfx\Exception
+     * @return Apl\Gfx\Image The current image object.
      */
     function &text() {
         $args = func_get_args();
         try {
             $direction = $this -> _directionArgs($args);
-        } catch (AP5L_Gfx_Exception $e) {
-            throw new AP5L_Gfx_Exception('text: ' . $e -> getMessage());
+        } catch (Gfx\Exception $e) {
+            throw new Exception('text: ' . $e -> getMessage());
         }
         $text = array_shift($args);
         $font = array_shift($args);
@@ -1439,21 +1440,21 @@ class AP5L_Gfx_Image extends AP5L_Php_InflexibleObject {
         /*
         echo 'size=', $size, ' ang=', $direction[1], ' x=',
             $direction[0] -> x, ' y=', $direction[0] -> y, ' dc=', $dc,
-            ' f=', $font, ' t=', $text, AP5L::NL;
+            ' f=', $font, ' t=', $text, \Apl::NL;
         /**/
         $result = @imagettftext($this -> _im, $size, $direction[1],
             $direction[0] -> x, $direction[0] -> y,
             $dc, $font, $text);
         if (! $result) {
-            throw new AP5L_Gfx_Exception(
+            throw new Exception(
                 __METHOD__ . ': Operation failed in GD library.'
             );
         }
         $this -> _textLocn = array(
-            AP5L_Math_Point2d::factory($result[0], $result[1]),
-            AP5L_Math_Point2d::factory($result[2], $result[3]),
-            AP5L_Math_Point2d::factory($result[4], $result[5]),
-            AP5L_Math_Point2d::factory($result[6], $result[7]),
+            Math\Point2d::factory($result[0], $result[1]),
+            Math\Point2d::factory($result[2], $result[3]),
+            Math\Point2d::factory($result[4], $result[5]),
+            Math\Point2d::factory($result[6], $result[7]),
         );
         return $this;
     }
@@ -1466,7 +1467,7 @@ class AP5L_Gfx_Image extends AP5L_Php_InflexibleObject {
      * @param array Options. For PNG, Options are: quality (default 0), filter
      * (default PNG_NO_FILTER), and alpha (default true); for WBMP the option is
      * "threshold" (default null)
-     * @return AP5L_Gfx_Image The current image object.
+     * @return \Apl\Gfx\Image The current image object.
      */
     function write($fid = null, $type = 'png', $options = array()) {
         if (empty($type)) {
@@ -1516,5 +1517,4 @@ class AP5L_Gfx_Image extends AP5L_Php_InflexibleObject {
     }
 
 }
-
 

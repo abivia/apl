@@ -4,13 +4,13 @@
  *
  * @license http://www.gnu.org/licenses/gpl-3.0.html GPLv3
  * @copyright 2006-2008, Alan Langford
- * @version $Id: Exception.php 91 2009-08-21 02:45:29Z alan.langford@abivia.com $
+ * @version $Id: MathException.php 91 2009-08-21 02:45:29Z alan.langford@abivia.com $
  * @author Alan Langford <alan.langford@abivia.com>
  */
 
 /**
- * Forms Exception class.
- * 
+ * Forms MathException class.
+ *
  * @package AP5L
  * @subpackage Forms
  */

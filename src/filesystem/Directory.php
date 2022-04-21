@@ -1,20 +1,18 @@
 <?php
 /**
- * Abivia PHP5 Library
+ * Abivia PHP Library
  *
- * @package AP5L
+ * @package Apl
  * @license http://www.gnu.org/licenses/gpl-3.0.html GPLv3
  * @copyright 2008, Alan Langford
- * @version $Id: Directory.php 100 2011-03-21 18:26:21Z alan.langford@abivia.com $
  * @author Alan Langford <alan.langford@abivia.com>
  */
+namespace Apl\Filesystem;
 
 /**
  * Helper functions for file paths.
- *
- * @package AP5L
  */
-class AP5L_Filesystem_Directory extends AP5L_Php_InflexibleObject {
+class Directory extends \Apl\Php\InflexibleObject {
     /**
      * Destination directory in file copy operations.
      *
@@ -75,7 +73,7 @@ class AP5L_Filesystem_Directory extends AP5L_Php_InflexibleObject {
      * @param int Directory permissions.
      */
     static function create($dir, $mode = 0777) {
-        if (AP5L::DS == '\\') {
+        if (\Apl::DS == '\\') {
             $mode = null;
         }
         $dir = self::clean($dir);
@@ -98,25 +96,25 @@ class AP5L_Filesystem_Directory extends AP5L_Php_InflexibleObject {
      *
      * @param string The source directory.
      * @param string The target directory.
-     * @throws AP5L_Filesystem_Exception on error.
+     * @throws Exception on error.
      */
     static function copy($src, $dest) {
         $src = self::clean($src);
         self::create($dest);
-        $listener = new AP5L_Filesystem_Directory();
+        $listener = new Directory();
         $listener -> setOperation('updateCopy');
         $listener -> setDestination($dest);
         // Get a private event dispatcher
-        $disp = AP5L_Event_Dispatcher::getInstance(__CLASS__);
+        $disp = \Apl\Event\Dispatcher::getInstance(__CLASS__);
         $disp -> setOption('queue', false);
         $disp -> listen($listener);
         // Create a directory listing, set the dispatcher
-        $listing = new AP5L_FileSystem_Listing();
+        $listing = new Listing();
         $listing -> setDispatcher($disp);
         try {
             // Get the listing
             $listing -> execute($src);
-        } catch (Exception $err) {
+        } catch (\Exception $err) {
             // Stop listening
             $disp -> unlisten($listener);
             throw $err;
@@ -129,18 +127,18 @@ class AP5L_Filesystem_Directory extends AP5L_Php_InflexibleObject {
      * Recursively remove a directory.
      *
      * @param string The directory to be removed.
-     * @throws AP5L_Filesystem_Exception on error.
+     * @throws Exception on error.
      */
     static function delete($dir) {
         $dir = self::clean($dir);
-        $listener = new AP5L_Filesystem_Directory();
+        $listener = new Directory();
         $listener -> setOperation('updateDelete');
         // Get a private event dispatcher
-        $disp = AP5L_Event_Dispatcher::getInstance(__CLASS__);
+        $disp = \Apl\Event\Dispatcher::getInstance(__CLASS__);
         $disp -> setOption('queue', false);
         $disp -> listen($listener);
         // Create a directory listing, set the dispatcher
-        $listing = new AP5L_FileSystem_Listing();
+        $listing = new Listing();
         $listing -> setDispatcher($disp);
         try {
             // Get the listing
@@ -160,7 +158,7 @@ class AP5L_Filesystem_Directory extends AP5L_Php_InflexibleObject {
      * @param string The base directory to start scanning from.
      * @param options Processing options:
      * <ul><li>"exclude" a regular expression that will exclude an entry from the
-     * return results wne matched. Optional, default is to include all.
+     * return results we matched. Optional, default is to include all.
      * </li><li>"include" a regular expression that must be matched before an entry
      * is included in the return results. Optional, default is to include all.
      * </li><li>"relative" return results relative to the base directory if set,
@@ -184,7 +182,7 @@ class AP5L_Filesystem_Directory extends AP5L_Php_InflexibleObject {
             isset($options['transform'])
             && (!is_array($options['transform']) || count($options['transform']) < 2)
         ) {
-            throw new AP5L_Exception(
+            throw new \Apl\Exception(
                 'The "transform" option value must be a two element array.', 1
             );
         }
@@ -192,10 +190,10 @@ class AP5L_Filesystem_Directory extends AP5L_Php_InflexibleObject {
         $dir = self::clean($dir);
         $path = $dir;
         if (! @is_dir($path)) {
-            throw new AP5L_Exception('Scan error. ' . $path . ' is not a directory.', 1);
+            throw new \Apl\Exception('Scan error. ' . $path . ' is not a directory.', 1);
         }
         if (! ($dh = self::_opendir($path))) {
-            throw new AP5L_Exception('Scan error. Unable to open ' . $path, 2);
+            throw new \Apl\Exception('Scan error. Unable to open ' . $path, 2);
         }
         $prefix = ($relativePath ? '' : $path);
         /*
@@ -242,7 +240,7 @@ class AP5L_Filesystem_Directory extends AP5L_Php_InflexibleObject {
      * @param string The base directory to start scanning from.
      * @param options Processing options:
      * <ul><li>"exclude" a regular expression that will exclude an entry from the
-     * return results wne matched. Optional, default is to include all.
+     * return results we matched. Optional, default is to include all.
      * </li><li>"include" a regular expression that must be matched before an entry
      * is included in the return results. Optional, default is to include all.
      * </li><li>"relative" return results relative to the base directory if set,
@@ -266,7 +264,7 @@ class AP5L_Filesystem_Directory extends AP5L_Php_InflexibleObject {
             isset($options['transform'])
             && (!is_array($options['transform']) || count($options['transform']) < 2)
         ) {
-            throw new AP5L_Exception(
+            throw new \Apl\Exception(
                 'The "transform" option value must be a two element array.', 1
             );
         }
@@ -274,10 +272,10 @@ class AP5L_Filesystem_Directory extends AP5L_Php_InflexibleObject {
         $dir = self::clean($dir);
         $path = $dir;
         if (! @is_dir($path)) {
-            throw new AP5L_Exception('Scan error. ' . $path . ' is not a directory.', 1);
+            throw new \Apl\Exception('Scan error. ' . $path . ' is not a directory.', 1);
         }
         if (! ($dh = self::_opendir($path))) {
-            throw new AP5L_Exception('Scan error. Unable to open ' . $path, 2);
+            throw new \Apl\Exception('Scan error. Unable to open ' . $path, 2);
         }
         $prefix = ($relativePath ? '' : $path);
         /*
@@ -338,9 +336,9 @@ class AP5L_Filesystem_Directory extends AP5L_Php_InflexibleObject {
      *
      * This method uses events from the directory walk.
      *
-     * @param AP5L_Event_Notification The event object.
+     * @param \Apl\Event\Notification The event object.
      */
-    function update(AP5L_Event_Notification $subject) {
+    function update(\Apl\Event\Notification $subject) {
         $method = $this -> _oprn;
         $this -> $method($subject);
     }
@@ -350,17 +348,17 @@ class AP5L_Filesystem_Directory extends AP5L_Php_InflexibleObject {
      *
      * This method uses events from the directory walk to copy files.
      *
-     * @param AP5L_Event_Notification The event object.
+     * @param \Apl\Event\Notification The event object.
      */
-    function updateCopy(AP5L_Event_Notification $subject) {
+    function updateCopy(\Apl\Event\Notification $subject) {
         switch ($subject -> getName()) {
-            case AP5L_Filesystem_Listing::EVENT_ADD_FILE: {
+            case Listing::EVENT_ADD_FILE: {
                 $info = $subject -> getInfo();
                 copy($info['fullname'], $this -> _dest . $info['relname']);
             }
             break;
 
-            case AP5L_Filesystem_Listing::EVENT_LAST_DIR: {
+            case Listing::EVENT_LAST_DIR: {
                 $info = $subject -> getInfo();
                 // This will throw warnings on permissions errors
                 @mkdir($this -> _dest . $info['relname']);
@@ -375,19 +373,19 @@ class AP5L_Filesystem_Directory extends AP5L_Php_InflexibleObject {
      *
      * This method uses events from the directory walk to delete files.
      *
-     * @param AP5L_Event_Notification The event object.
+     * @param \Apl\Event\Notification The event object.
      */
-    function updateDelete(AP5L_Event_Notification $subject) {
+    function updateDelete(\Apl\Event\Notification $subject) {
         switch ($subject -> getName()) {
-            case AP5L_Filesystem_Listing::EVENT_ADD_FILE: {
+            case Listing::EVENT_ADD_FILE: {
                 $info = $subject -> getInfo();
                 unlink($info['fullname']);
             }
             break;
 
-            case AP5L_Filesystem_Listing::EVENT_LAST_DIR: {
+            case Listing::EVENT_LAST_DIR: {
                 $info = $subject -> getInfo();
-                if (AP5L::DS == '\\') {
+                if (\Apl::DS == '\\') {
                     // Windows is special. Try flushing a subdir delete...
                     if (($dh = opendir($info['fullname']))) {
                         closedir($dh);

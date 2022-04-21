@@ -1,128 +1,112 @@
 <?php
 /**
- * Abivia PHP5 Library
+ * Abivia PHP Library
  *
- * @package AP5L
+ * @package Apl
  * @license http://www.gnu.org/licenses/gpl-3.0.html GPLv3
  * @copyright 2008, Alan Langford
- * @version $Id: Listing.php 100 2011-03-21 18:26:21Z alan.langford@abivia.com $
  * @author Alan Langford <alan.langford@abivia.com>
  */
+namespace Apl\Filesystem;
+use \Apl\Event;
 
 /**
  * Walk a directory tree, accumulating a list of files.
- *
- * @package AP5L
  */
-class AP5L_Filesystem_Listing extends AP5L_Php_InflexibleObject {
+class Listing extends \Apl\Php\InflexibleObject {
     const EVENT_ADD_DIR = 'addDir';
     const EVENT_ADD_FILE = 'addFile';
     const EVENT_LAST_DIR = 'lastDir';
     const EVENT_LAST_FILE = 'lastFile';
 
-    /* These constants deprecated in favour of copies in AP5L_Filesystem */
+    /* These constants deprecated in favour of copies in Apl\Filesystem */
     const TYPE_DIRECTORY = 1;
     const TYPE_FILE = 2;
     /**
      * Base directory for the listing. Files in the listing are relative to this
      * directory.
-     *
      * @var string
      */
     protected $_baseDir = '';
 
     /**
      * The directories in the listing.
-     *
      * @var array
      */
     protected $_dirs = array();
 
     /**
      * Directory sequence control. Only meaningful value is "first".
-     *
      * @var string
      */
     protected $_dirSeq = '';
 
     /**
      * The directory tree structure
-     *
      * @var array
      */
     protected $_dirTree = array();
 
     /**
      * Optional event dispatcher.
-     *
      * @var callback
      */
     protected $_dispatcher = null;
 
     /**
      * The files in the listing.
-     *
      * @var array
      */
     protected $_files = array();
 
     /**
      * File filter callback function.
-     *
      * @var string|array
      */
     protected $_filterCallback;
 
     /**
      * Filter type mask.
-     *
      * @var integer
      */
     protected $_filterMask;
-    
+
     /**
-     * User's option seclections
+     * User's option selections
      */
     protected $_options;
 
     /**
-     * Relative paths fag.
-     *
+     * Relative paths flag.
      * @var boolean
      */
     protected $_relativePath = false;
 
     /**
      * Sort results flag.
-     *
      * @var boolean
      */
     protected $_sort = true;
 
     /**
      * Walk a directory tree, accumulating file paths.
-     *
      * @param string Scan mode. If set to "tests", accumulates files of the form
      * "*-test.php"
      */
     protected function _dirWalk($dir, $leaf = '') {
         $path = $this -> _baseDir . $dir;
         if (! @is_dir($path)) {
-            throw new AP5L_Exception('Scan error. ' . $path . ' is not a directory.', 1);
+            throw new \Apl\Exception('Scan error. ' . $path . ' is not a directory.', 1);
         }
         if(! ($dh = @opendir($path))) {
-            throw new AP5L_Exception('Scan error. Unable to open ' . $path, 2);
+            throw new \Apl\Exception('Scan error. Unable to open ' . $path, 2);
         }
         $prefix = ($this -> _relativePath ? $dir : $path);
         $this -> _dirs[] = $prefix;
         if ($this -> _dispatcher) {
-            $dirInfo = array('fullname' => $path, 'name' => $leaf, 'relname' => $dir);
+            $dirInfo = new Node($path, $leaf, $dir);
             $this -> _dispatcher -> notify(
-                new AP5L_Event_Notification(
-                    $this,
-                    self::EVENT_ADD_DIR,
-                    $dirInfo
-                )
+                new Event\Notification($this, self::EVENT_ADD_DIR, $dirInfo)
             );
         }
         /*
@@ -147,7 +131,7 @@ class AP5L_Filesystem_Listing extends AP5L_Php_InflexibleObject {
                      * filtered to the results.
                      */
                     if (
-                        $this -> _filterMask & AP5L_FileSystem::TYPE_FILE
+                        $this -> _filterMask & \Apl\FileSystem::TYPE_FILE
                         && $this -> isInList($fid)
                     ) {
                         $list[] = $fileName;
@@ -169,19 +153,13 @@ class AP5L_Filesystem_Listing extends AP5L_Php_InflexibleObject {
             }
         }
         foreach ($list as $fileName) {
-            $filePath = $prefix . $fileName;
             $this -> _files[] = $prefix . $fileName;
             if ($this -> _dispatcher) {
                 $this -> _dispatcher -> notify(
-                    new AP5L_Event_Notification(
+                    new Event\Notification(
                         $this,
                         self::EVENT_ADD_FILE,
-                        array(
-                            'fullname' => $path . $fileName,
-                            'name' => $fileName,
-                            'reldir' => $dir,
-                            'relname' => $dir . $fileName
-                        )
+                        new Node($path . $fileName, $fileName, $dir, $dir . $fileName)
                     )
                 );
             }
@@ -189,7 +167,7 @@ class AP5L_Filesystem_Listing extends AP5L_Php_InflexibleObject {
         if ($this -> _dispatcher) {
             // End of the file list
             $this -> _dispatcher -> notify(
-                new AP5L_Event_Notification($this, self::EVENT_LAST_FILE, $dirInfo)
+                new Event\Notification($this, self::EVENT_LAST_FILE, $dirInfo)
             );
         }
         if ($this -> _dirSeq != 'first') {
@@ -203,13 +181,13 @@ class AP5L_Filesystem_Listing extends AP5L_Php_InflexibleObject {
         if ($this -> _dispatcher) {
             // End of the directory list
             $this -> _dispatcher -> notify(
-                new AP5L_Event_Notification($this, self::EVENT_LAST_DIR, $dirInfo)
+                new Event\Notification($this, self::EVENT_LAST_DIR, $dirInfo)
             );
         }
     }
-    
+
     protected function _getOptions() {
-        
+
     }
 
     /**
@@ -217,12 +195,12 @@ class AP5L_Filesystem_Listing extends AP5L_Php_InflexibleObject {
      *
      * @param string The base directory to start scanning from.
      * @param options Processing options:
-     * <ul><li>"callback" a function/method to determine which files / direcrories
+     * <ul><li>"callback" a function/method to determine which files / directories
      * should be included. Parameters are the path and the type (file or directory)
      * (see {@see isInList()}).
      * </li><li>"directories" When to fire directory traversal, first or last.
      * Default is last.
-     * </li><li>"filter" mask for return types (use the AP5L_FileSystem::TYPE_
+     * </li><li>"filter" mask for return types (use the TYPE_
      * constants). Default is both files and directories.
      * </li><li>"relative" return results relative to the base directory if set,
      * absolute paths if false (default false).
@@ -243,7 +221,7 @@ class AP5L_Filesystem_Listing extends AP5L_Php_InflexibleObject {
         $this -> _filterCallback = isset($options['callback']) ? $options['callback'] : '';
         $this -> _filterMask = isset($options['filter'])
             ? $options['filter']
-            : AP5L_FileSystem::TYPE_DIRECTORY | AP5L_FileSystem::TYPE_FILE
+            : \Apl\FileSystem::TYPE_DIRECTORY | \Apl\FileSystem::TYPE_FILE
         ;
         if (! $this -> _filterMask) {
             // Everything is masked, this is simple!
@@ -256,22 +234,22 @@ class AP5L_Filesystem_Listing extends AP5L_Php_InflexibleObject {
         /*
          * Get the list
          */
-        $this -> _baseDir = AP5L_Filesystem_Directory::clean($baseDir);
+        $this -> _baseDir = Directory::clean($baseDir);
         $this -> _dirWalk('');
-        if ($this -> _filterMask & AP5L_FileSystem::TYPE_FILE) {
+        if ($this -> _filterMask & \Apl\FileSystem::TYPE_FILE) {
             $result = $this -> _files;
         } else {
             $result = $this -> _dirs;
         }
         return $result;
     }
-    
+
     /**
      * Create a filesystem listing object.
-     * 
+     *
      * @param string Filesystem type. Should be "local" or "ftp"
      * @returns object Lsisting object.
-     * @throws AP5L_Exception If the filesystem type is not recognized.
+     * @throws \Apl\Exception If the filesystem type is not recognized.
      */
     static function &factory($fsType = 'local') {
         $fsType = ucfirst(strtolower($fsType));
@@ -281,7 +259,7 @@ class AP5L_Filesystem_Listing extends AP5L_Php_InflexibleObject {
             $fsType = __CLASS__;
         }
         if (!class_exists($fsType)) {
-            throw AP5L_Exception::factory('', 'Class ' . $fsType . ' does not exist.');
+            throw \Apl\Exception::factory('', 'Class ' . $fsType . ' does not exist.');
         }
         return new $fsType;
     }
@@ -315,9 +293,9 @@ class AP5L_Filesystem_Listing extends AP5L_Php_InflexibleObject {
     }
 
     /**
-     * Direcrory inclusion filter.
+     * Directory inclusion filter.
      *
-     * The default filter includes all direcrories. This functionality can be changed
+     * The default filter includes all directories. This functionality can be changed
      * by either passing a callback function to execute() via the "callback"
      * option, or by overriding the method.
      *
@@ -327,7 +305,7 @@ class AP5L_Filesystem_Listing extends AP5L_Php_InflexibleObject {
     function isInDirList($fid) {
         if ($this -> _filterCallback) {
             return call_user_func(
-                $this -> _filterCallback, $fid, AP5L_FileSystem::TYPE_DIRECTORY
+                $this -> _filterCallback, $fid, FileSystem::TYPE_DIRECTORY
             );
         }
         return true;
@@ -346,7 +324,7 @@ class AP5L_Filesystem_Listing extends AP5L_Php_InflexibleObject {
     function isInList($fid) {
         if ($this -> _filterCallback) {
             return call_user_func(
-                $this -> _filterCallback, $fid, AP5L_FileSystem::TYPE_FILE
+                $this -> _filterCallback, $fid, FileSystem::TYPE_FILE
             );
         }
         return true;
@@ -355,10 +333,10 @@ class AP5L_Filesystem_Listing extends AP5L_Php_InflexibleObject {
     /**
      * Set a dispatcher to receive event notifications.
      *
-     * @param AP5L_Event_Dispatcher A dispatcher object.
+     * @param \Apl\Event\Dispatcher A dispatcher object.
      * @return void
      */
-    function setDispatcher($dispatcher) {
+    function setDispatcher(Event\Dispatcher $dispatcher) {
         $this -> _dispatcher = $dispatcher;
     }
 

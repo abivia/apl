@@ -1,13 +1,13 @@
 %name PHP_LexerGenerator_Regex_
 %include {
-require_once 'PHP/LexerGenerator/Exception.php';
+require_once 'PHP/LexerGenerator/MathException.php';
 }
 %declare_class {class PHP_LexerGenerator_Regex_Parser}
 %syntax_error {
 /* ?><?php */
     // we need to add auto-escaping of all stuff that needs it for result.
     // and then validate the original regex only
-    echo "Syntax Error on line " . $this->_lex->line . ": token '" . 
+    echo "Syntax Error on line " . $this->_lex->line . ": token '" .
         $this->_lex->value . "' while parsing rule:";
     foreach ($this->yystack as $entry) {
         echo $this->tokenName($entry->major) . ' ';
@@ -15,7 +15,7 @@ require_once 'PHP/LexerGenerator/Exception.php';
     foreach ($this->yy_get_expected_tokens($yymajor) as $token) {
         $expect[] = self::$yyTokenName[$token];
     }
-    throw new Exception('Unexpected ' . $this->tokenName($yymajor) . '(' . $TOKEN
+    throw new MathException('Unexpected ' . $this->tokenName($yymajor) . '(' . $TOKEN
         . '), expected one of: ' . implode(',', $expect));
 }
 %include_class {
@@ -473,5 +473,5 @@ comment(A) ::= OPENASSERTION COMMENT(B) CLOSEPAREN. {
 }
 
 recur ::= OPENASSERTION RECUR CLOSEPAREN. {
-    throw new Exception('(?R) cannot work in this lexer');
+    throw new MathException('(?R) cannot work in this lexer');
 }

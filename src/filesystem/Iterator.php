@@ -2,17 +2,17 @@
 /**
  * Abivia PHP5 Library
  *
- * @package AP5L
+ * @package Apl
  * @license http://www.gnu.org/licenses/gpl-3.0.html GPLv3
  * @copyright 2008, Alan Langford
- * @version $Id: Asset.php 61 2008-06-01 17:20:30Z alan.langford@abivia.com $
  * @author Alan Langford <alan.langford@abivia.com>
  */
+namespace Apl\Filesystem;
 
 /**
  * Not ready... this is just a copy of Listing at this point.
  */
-class AP5L_Filesystem_Iterator {
+class Iterator {
     /**
      * Base directory for the listing. Files in the listing are relative to this
      * directory.
@@ -41,10 +41,10 @@ class AP5L_Filesystem_Iterator {
     protected function _dirWalk($dir) {
         $path = $this -> _startDir . $dir;
         if (! @is_dir($path)) {
-            throw new AP5L_Exception('Scan error. ' . $path . ' is not a directory.', 1);
+            throw new \Apl\Exception('Scan error. ' . $path . ' is not a directory.', 1);
         }
         if(! ($dh = @opendir($path))) {
-            throw new AP5L_Exception('Scan error. Unable to open ' . $path, 2);
+            throw new \Apl\Exception('Scan error. Unable to open ' . $path, 2);
         }
         /*
          * Walk through the directory collecting files and subdirectories. Then
@@ -117,7 +117,7 @@ class AP5L_Filesystem_Iterator {
     function open($baseDir, $options = array()) {
         $this -> _filterCallback = isset($options['callback']) ? $options['callback'] : '';
         $this -> _sort = isset($options['sort']) ? $options['sort'] : true;
-        $this -> _baseDir = AP5L_Filesystem_Directory::clean($baseDir);
+        $this -> _baseDir = Directory::clean($baseDir);
         $this -> _dirStack = array();
     }
 

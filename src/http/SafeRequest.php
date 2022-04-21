@@ -1,7 +1,7 @@
 <?php
 /**
  * Filter HTTP data.
- * 
+ *
  * @package AP5L
  * @subpackage Http
  * @license http://www.gnu.org/licenses/gpl-3.0.html GPLv3
@@ -17,9 +17,9 @@ class SafeRequest {
     const TYPE_NUMBER = 1;
     const TYPE_REGEX = 2;
     const TYPE_TEXT = 3;
-    
-    static $exceptionClass = 'Exception';
-    
+
+    static $exceptionClass = 'MathException';
+
     static function get($default, $source, $varName, $type, $expr = '', $sub = null) {
         if (! isset($source[$varName])) {
             return $default;
@@ -35,7 +35,7 @@ class SafeRequest {
                 }
             }
             break;
-            
+
             case self::TYPE_REGEX: {
                 if (is_null($sub)) {
                     if (! preg_match($expr, $work)) {
@@ -46,12 +46,12 @@ class SafeRequest {
                 }
             }
             break;
-            
+
             case self::TYPE_TEXT: {
                 // strip slashes already did the work
             }
             break;
-            
+
         }
         return $work;
     }

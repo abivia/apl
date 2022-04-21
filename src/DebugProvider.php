@@ -2,17 +2,17 @@
 /**
  * Abivia PHP5 Library
  *
- * @package AP5L
+ * @package Apl
  * @license http://www.gnu.org/licenses/gpl-3.0.html GPLv3
  * @copyright 2006-2008, Alan Langford
- * @version $Id: DebugProvider.php 91 2009-08-21 02:45:29Z alan.langford@abivia.com $
  * @author Alan Langford <alan.langford@abivia.com>
  */
+namespace Apl;
 
 /**
  * Interface for generators of diagnostic output
  */
-interface AP5L_DebugProvider {
+interface DebugProvider {
     /**
      * Send a backtrace to the debug output stream.
      *
@@ -42,7 +42,7 @@ interface AP5L_DebugProvider {
     function getHandle($key = '');
 
     /**
-     * Get the setting for a particluar state.
+     * Get the setting for a particular state.
      *
      * If the explicit setting is not set, the closest matching setting in the
      * evaluation hierarchy is returned.

@@ -1,14 +1,15 @@
 <?php
 /**
- * Abivia PHP5 Library
+ * Abivia PHP Library
  *
- * @package AP5L
+ * @package Apl
  * @license http://www.gnu.org/licenses/gpl-3.0.html GPLv3
  * @copyright 2008, Alan Langford
  * @version $Id: Debug.php 91 2009-08-21 02:45:29Z alan.langford@abivia.com $
  * @author Alan Langford <alan.langford@abivia.com>
  */
 
+namespace Apl;
 /**
  * Debug: a diagnostic output control class.
  *
@@ -24,7 +25,7 @@
  * leaving default diagnostic output on. This would be achieved with:
  *
  * <code>
- * $dbg = AP5L_Debug::getInstance();
+ * $dbg = Apl\Debug::getInstance();
  * $dbg -> setState('', true);
  * $dbg -> setState ('backtrace@', false);
  * </code>
@@ -43,7 +44,7 @@
  * class MyClass_Driver {
  *
  *     function foo() {
- *         AP5L::getDebug() -> write('some message', 'details@');
+ *         Apl::getDebug() -> write('some message', 'details@');
  *     }
  * }
  * </code>
@@ -63,7 +64,7 @@
  * names. An application can use any values in the settings, but when this is
  * done, the setting string needs to be passed in as a handle explicitly.
  */
-abstract class AP5L_Debug implements AP5L_DebugProvider {
+abstract class Debug implements DebugProvider {
     /**
      * Mapping from setting key to handle.
      *
@@ -95,7 +96,7 @@ abstract class AP5L_Debug implements AP5L_DebugProvider {
      *
      * @var string
      */
-    public $newLine = AP5L::NL;
+    public $newLine = Apl::NL;
 
     /**
      * Output control settings. Array indexed by hierarchical key
@@ -213,7 +214,7 @@ abstract class AP5L_Debug implements AP5L_DebugProvider {
      * Get information about where an application invoked the debug output
      * class.
      *
-     * @return array A debug_backtrace() array entry detailing where AP5L_Debug
+     * @return array A debug_backtrace() array entry detailing where Debug
      * was called.
      */
     protected function _getCaller() {
@@ -235,7 +236,7 @@ abstract class AP5L_Debug implements AP5L_DebugProvider {
      * Get handle of caller.
      *
      * @return string A string of the form class::method, where the class and
-     * the method are those of the module that invoked the AP5L_Debug class.
+     * the method are those of the module that invoked the Debug class.
      */
     protected function _getDefaultHandle() {
         $caller = $this -> _getCaller();
@@ -322,7 +323,7 @@ abstract class AP5L_Debug implements AP5L_DebugProvider {
     /**
      * Get the class singleton.
      *
-     * @return AP5L_Debug
+     * @return Apl\Debug
      */
     static function getInstance() {
         return self::$_instance;

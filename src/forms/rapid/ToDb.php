@@ -1,7 +1,7 @@
 <?php
 /**
  * Rapid form with resuts saved in database.
- * 
+ *
  * @license http://www.gnu.org/licenses/gpl-3.0.html GPLv3
  * @copyright 2007, Alan Langford
  * @version $Id: ToDb.php 91 2009-08-21 02:45:29Z alan.langford@abivia.com $
@@ -14,15 +14,15 @@
 
 /**
  * AP5L_Forms_Rapid object that saves results in a database.
- * 
+ *
  * @package AP5L
  * @subpackage Forms
  */
 class AP5L_Forms_Rapid_ToDb extends AP5L_Forms_Rapid {
     /**
      * Column type information; indexed by colname, or '*' for default.
-     * 
-     * @var array 
+     *
+     * @var array
      */
     private $_dataTypes = array('*' => 'text');
     /**
@@ -33,20 +33,20 @@ class AP5L_Forms_Rapid_ToDb extends AP5L_Forms_Rapid {
     private $_fieldMap = array();
     /**
      * Database connection to use.
-     * 
-     * @var object 
+     *
+     * @var object
      */
     protected $dbc;
     /**
      * Values to be inserted into the database, formatted for insert.
-     * 
-     * @var array 
+     *
+     * @var array
      */
     protected $dbRecord = array();
     /**
      * Name of the table where results are stored.
-     * 
-     * @var string 
+     *
+     * @var string
      */
     protected $table;
 
@@ -71,9 +71,9 @@ class AP5L_Forms_Rapid_ToDb extends AP5L_Forms_Rapid {
      * application specific data (for example, a timestamp). Save the
      * information in dbRecord as quoted, escaped column values, indexed by
      * column name.
-     * 
+     *
      * @return boolean True on successful formatting
-     * @throws AP5L_Forms_Exception Exception thrown if an error occurs; this is
+     * @throws AP5L_Forms_Exception MathException thrown if an error occurs; this is
      * most likely a database connection issue.
      */
     function onPrepareData() {

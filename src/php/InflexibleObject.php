@@ -1,8 +1,9 @@
 <?php
+namespace Apl\Php;
 /**
  * Inflexible object: throw exceptions on attempts to access dynamic methods,
  * properties.
- * 
+ *
  * @package AP5L
  * @subpackage Php
  * @license http://www.gnu.org/licenses/gpl-3.0.html GPLv3
@@ -13,13 +14,13 @@
 
 /**
  * Inflexible object.
- * 
+ *
  * This class traps attempts to access methods and members that aren't in the
  * class definition and to throw an exception when this occurs. This is very
  * useful in trapping typographical errors and other unplanned uses of the
  * class.
  */
-class AP5L_Php_InflexibleObject {
+class InflexibleObject {
     /**
      * Type of exception to throw.
      *
@@ -28,7 +29,7 @@ class AP5L_Php_InflexibleObject {
      *
      * @var string
      */
-    static $inflexibleObjectExceptionType = 'Exception';
+    static $inflexibleObjectExceptionType = 'MathException';
 
     function __call($name, $args) {
         $ec = self::$inflexibleObjectExceptionType;

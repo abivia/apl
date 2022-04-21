@@ -9,11 +9,12 @@
  * @version $Id: Rectangular.php 91 2009-08-21 02:45:29Z alan.langford@abivia.com $
  * @author Alan Langford <alan.langford@abivia.com>
  */
+namespace \Apl\Gfx\FillMap;
 
 /**
  * Fills from an internal anchor point to the edges of a rectangle.
  */
-class AP5L_Gfx_FillMap_Rectangular extends AP5L_Gfx_FillMap {
+class Rectangular extends FillMap {
 
     const TYPE_LINEAR = 0;
     const TYPE_COS = 1;
@@ -23,7 +24,7 @@ class AP5L_Gfx_FillMap_Rectangular extends AP5L_Gfx_FillMap {
     /**
      * The anchor point
      *
-     * @var AP5L_Gfx_Point2d
+     * @var \Apl\Math\Point2d
      */
     protected $_anchor;
 

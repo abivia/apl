@@ -9,11 +9,12 @@
  * @version $Id: FillMap.php 91 2009-08-21 02:45:29Z alan.langford@abivia.com $
  * @author Alan Langford <alan.langford@abivia.com>
  */
+namespace \Apl\Gfx;
 
 /**
  * Base fill mapping class.
  */
-abstract class AP5L_Gfx_FillMap extends AP5L_Php_InflexibleObject {
+abstract class FillMap extends \Apl\Php\InflexibleObject {
 
     /**
      * Use midpoint of band at endpoints.

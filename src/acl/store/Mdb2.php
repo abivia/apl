@@ -4,9 +4,9 @@
  *
  * @license http://www.gnu.org/licenses/gpl-3.0.html GPLv3
  * @copyright 2007, Alan Langford
- * @version $Id: Mdb2.php 91 2009-08-21 02:45:29Z alan.langford@abivia.com $
  * @author Alan Langford <alan.langford@abivia.com>
  */
+namespace Apl\Acl\Store;
 
 /**
  * ACL Storage manager for PEAR MDB2.
@@ -17,9 +17,9 @@
  *
  * @package AP5L
  * @subpackage Acl
- * @todo move method defs to AP5L_Acl_Store
+ * @todo move method defs to \Apl\Acl\Store
  */
-class AP5L_Acl_Store_Mdb2 extends AP5L_Acl_Store_Sql {
+class Mdb2 extends Sql {
     /**
      * Database connection.
      *
@@ -42,7 +42,7 @@ class AP5L_Acl_Store_Mdb2 extends AP5L_Acl_Store_Sql {
      *
      * @param string The base table name (without any prefix).
      * @param array Table definition from the $_schema table.
-     * @throws AP5L_Db_Exception On any database error.
+     * @throws \Apl\Db\Exception On any database error.
      */
     protected function _createTable($baseTable, $tableDef, $options = array()) {
         $tableName = $this -> _prefix . $baseTable;
@@ -84,7 +84,7 @@ class AP5L_Acl_Store_Mdb2 extends AP5L_Acl_Store_Sql {
             $tableName, $mdbCols, $mdbOpts
         );
         if (PEAR::isError($result)) {
-            throw new AP5L_Db_Exception($result -> toString());
+            throw new \Apl\Db\Exception($result -> toString());
         }
         /*
          * MDB2's create index is PATHETIC; we do it ourselves.
@@ -189,7 +189,7 @@ class AP5L_Acl_Store_Mdb2 extends AP5L_Acl_Store_Sql {
      * Remove asset records that have a parent that has been removed from the
      * data store.
      *
-     * @throws AP5L_Db_Exception On any database error.
+     * @throws \Apl\Db\Exception On any database error.
      */
     protected function _removeAssetOrphans() {
         $orphans = 'SELECT count(*) FROM '
@@ -204,12 +204,12 @@ class AP5L_Acl_Store_Mdb2 extends AP5L_Acl_Store_Sql {
         while (true) {
             $result = $this -> _dbc -> queryOne($orphans);
             if (PEAR::isError($result)) {
-                throw new AP5L_Db_Exception($result -> toString());
+                throw new \Apl\Db\Exception($result -> toString());
             }
             if (! $result) break;
             $result = $this -> _dbc -> query($sql);
             if (PEAR::isError($result)) {
-                throw new AP5L_Db_Exception($result -> toString());
+                throw new \Apl\Db\Exception($result -> toString());
             }
         }
     }
@@ -218,7 +218,7 @@ class AP5L_Acl_Store_Mdb2 extends AP5L_Acl_Store_Sql {
      * Remove permission records that are associated with an asset or requester
      * that has been removed from the data store.
      *
-     * @throws AP5L_Db_Exception On any database error.
+     * @throws \Apl\Db\Exception On any database error.
      */
     protected function _removePermissionOrphans() {
         // Protect domainID==0 to retain setup information
@@ -230,7 +230,7 @@ class AP5L_Acl_Store_Mdb2 extends AP5L_Acl_Store_Sql {
             . ' AND ' . $this -> _prefix . 'permission.domainID!=0';
         $result = $this -> _dbc -> query($sql);
         if (PEAR::isError($result)) {
-            throw new AP5L_Db_Exception($result -> toString());
+            throw new \Apl\Db\Exception($result -> toString());
         }
         // Protect domainID==0 to retain setup information
         $sql = 'DELETE FROM ' . $this -> _prefix . 'permission'
@@ -241,7 +241,7 @@ class AP5L_Acl_Store_Mdb2 extends AP5L_Acl_Store_Sql {
             . ' AND ' . $this -> _prefix . 'permission.domainID!=0';
         $result = $this -> _dbc -> query($sql);
         if (PEAR::isError($result)) {
-            throw new AP5L_Db_Exception($result -> toString());
+            throw new \Apl\Db\Exception($result -> toString());
         }
     }
 
@@ -287,7 +287,7 @@ class AP5L_Acl_Store_Mdb2 extends AP5L_Acl_Store_Sql {
      * Record the schema version in the database
      *
      * @param string Version identifier
-     * @throws AP5L_Db_Exception On any database error.
+     * @throws \Apl\Db\Exception On any database error.
      */
     protected function _setSchemaVersion($version) {
         $sql = 'REPLACE ' . $this -> _prefix . 'permission'
@@ -297,7 +297,7 @@ class AP5L_Acl_Store_Mdb2 extends AP5L_Acl_Store_Sql {
             ;
         $result = $this -> _dbc -> query($sql);
         if (PEAR::isError($result)) {
-            throw new AP5L_Db_Exception($result -> toString());
+            throw new \Apl\Db\Exception($result -> toString());
         }
     }
 
@@ -305,12 +305,12 @@ class AP5L_Acl_Store_Mdb2 extends AP5L_Acl_Store_Sql {
      * Table truncation.
      *
      * @param string The name of the table to be emptied.
-     * @throws AP5L_Db_Exception On any database error.
+     * @throws \Apl\Db\Exception On any database error.
      */
     protected function _truncate($table) {
         $result = $this -> _dbc -> query('TRUNCATE ' . $this -> _prefix . $table);
         if (PEAR::isError($result)) {
-            throw new AP5L_Db_Exception($result -> toString());
+            throw new \Apl\Db\Exception($result -> toString());
         }
     }
 
@@ -320,22 +320,22 @@ class AP5L_Acl_Store_Mdb2 extends AP5L_Acl_Store_Sql {
      * Any permissions in the source asset that exist in the destination will be
      * lost.
      *
-     * @param AP5L_Acl_Asset The source asset. This asset will be merged into
+     * @param \Apl\Acl\Asset The source asset. This asset will be merged into
      * the target and then deleted.
-     * @param AP5L_Acl_Asset The destination asset. This asset will receive
+     * @param \Apl\Acl\Asset The destination asset. This asset will receive
      * permissions from the source.
-     * @throws AP5L_Db_Exception On any database error.
+     * @throws \Apl\Db\Exception On any database error.
      */
     function assetMerge($fromAsset, $toAsset) {
         $className = get_class($fromAsset);
         if (! isset($this -> _classToTable[$className])) {
-            throw new AP5L_Db_Exception('Can\'t handle class name ' . $className . '.');
+            throw new \Apl\Db\Exception('Can\'t handle class name ' . $className . '.');
         }
         $assetKey = self::$_primaryKey[$className][0];
         /*
          * Eliminate any duplicates in the target asset.
          */
-        $permissionKeys = self::$_primaryKey['AP5L_Acl_Permission'];
+        $permissionKeys = self::$_primaryKey['\Apl\Acl\Permission'];
         $join = '';
         $glue = ' ON ';
         foreach ($permissionKeys as $key) {
@@ -354,7 +354,7 @@ class AP5L_Acl_Store_Mdb2 extends AP5L_Acl_Store_Sql {
             ;
         $result = $this -> _dbc -> query($sql);
         if (PEAR::isError($result)) {
-            throw new AP5L_Db_Exception($result -> toString());
+            throw new \Apl\Db\Exception($result -> toString());
         }
         /*
          * Update the remaining records. We don't need the join fields because
@@ -366,7 +366,7 @@ class AP5L_Acl_Store_Mdb2 extends AP5L_Acl_Store_Sql {
             ;
         $result = $this -> _dbc -> query($sql);
         if (PEAR::isError($result)) {
-            throw new AP5L_Db_Exception($result -> toString());
+            throw new \Apl\Db\Exception($result -> toString());
         }
         $this -> delete($fromAsset);
     }
@@ -380,44 +380,44 @@ class AP5L_Acl_Store_Mdb2 extends AP5L_Acl_Store_Sql {
      *
      * @param object|string Either the instance of the object to be deleted or
      * the name of the object's class.
-     * @param AP5L_Db_Expr|array|string Either an expression object, an array of
+     * @param \Apl\Db\Expr|array|string Either an expression object, an array of
      * key value pairs, or a criteria string. An array is considered to be a
      * list of equalities that need to be satisfied. A string must be handled by
      * the implementation.
      * @param array Any options. Options are implementation specific.
-     * @throws AP5L_Db_Exception On error (for example, if the object class
+     * @throws \Apl\Db\Exception On error (for example, if the object class
      * cannot be handled by this store).
      */
     function delete($object, $criteria = null, $options = array()) {
         if (is_object($object)) {
             $className = get_class($object);
             switch ($className) {
-                case 'AP5L_Acl_Asset': {
+                case '\Apl\Acl\Asset': {
                     $sql = 'DELETE FROM ' . $this -> _prefix . 'asset AS a'
                         . ', ' . $this -> _prefix . 'permission AS p'
                         . ' WHERE a.assetID=' . $object -> getID()
                         . ' AND s.assetID=p.assetID';
                     $result = $this -> _dbc -> query($sql);
                     if (PEAR::isError($result)) {
-                        throw new AP5L_Db_Exception($result -> toString());
+                        throw new \Apl\Db\Exception($result -> toString());
                     }
                     $this -> _removeAssetOrphans();
                     return;
                 }
                 break;
 
-                case 'AP5L_Acl_AssetSection': {
+                case '\Apl\Acl\AssetSection': {
                     $sql = 'DELETE FROM ' . $this -> _prefix . 'assetsection'
                         . ' WHERE assetSectionID=' . $object -> getID();
                    $result = $this -> _dbc -> query($sql);
                     if (PEAR::isError($result)) {
-                        throw new AP5L_Db_Exception($result -> toString());
+                        throw new \Apl\Db\Exception($result -> toString());
                     }
                     $sql = 'DELETE FROM ' . $this -> _prefix . 'asset'
                         . ' WHERE assetSectionID=' . $object -> getID();
                     $result = $this -> _dbc -> query($sql);
                     if (PEAR::isError($result)) {
-                        throw new AP5L_Db_Exception($result -> toString());
+                        throw new \Apl\Db\Exception($result -> toString());
                     }
                     $this -> _removeAssetOrphans();
                     $this -> _removePermissionOrphans();
@@ -425,7 +425,7 @@ class AP5L_Acl_Store_Mdb2 extends AP5L_Acl_Store_Sql {
                 }
                 break;
 
-                case 'AP5L_Acl_Domain': {
+                case '\Apl\Acl\Domain': {
                     $id = $object -> getID();
                     $sql = 'DELETE FROM ' . implode(',', $this -> classToTable);
                     $glue = ' WHERE ';
@@ -436,7 +436,7 @@ class AP5L_Acl_Store_Mdb2 extends AP5L_Acl_Store_Sql {
                 }
                 break;
 
-                case 'AP5L_Acl_Permission': {
+                case '\Apl\Acl\Permission': {
                     $sql = 'DELETE FROM ' . $this -> _prefix . 'permission'
                         . ' WHERE domainID=' . $this -> _domainID
                         . ' AND assetID=' . $this -> _quote($object -> getAssetID(), 'text')
@@ -445,74 +445,74 @@ class AP5L_Acl_Store_Mdb2 extends AP5L_Acl_Store_Sql {
                         ;
                     $result = $this -> _dbc -> query($sql);
                     if (PEAR::isError($result)) {
-                        throw new AP5L_Db_Exception($result -> toString());
+                        throw new \Apl\Db\Exception($result -> toString());
                     }
                     return;
                 }
                 break;
 
-                case 'AP5L_Acl_PermissionDefinition': {
+                case '\Apl\Acl\PermissionDefinition': {
                     $sql = 'DELETE FROM ' . $this -> _prefix . 'permission'
                         . ' WHERE permissionDefID=' . $object -> getID()
                         ;
                     $result = $this -> _dbc -> query($sql);
                     if (PEAR::isError($result)) {
-                        throw new AP5L_Db_Exception($result -> toString());
+                        throw new \Apl\Db\Exception($result -> toString());
                     }
                     $sql = 'DELETE FROM ' . $this -> _prefix . 'permissiondef'
                         . ' WHERE permissionDefID=' . $object -> getID()
                         ;
                     $result = $this -> _dbc -> query($sql);
                     if (PEAR::isError($result)) {
-                        throw new AP5L_Db_Exception($result -> toString());
+                        throw new \Apl\Db\Exception($result -> toString());
                     }
                     return;
                 }
                 break;
 
-                case 'AP5L_Acl_PermissionSection': {
+                case '\Apl\Acl\PermissionSection': {
                     $sql = 'DELETE FROM ' . $this -> _prefix . 'permissionsection'
                         . ' WHERE permissionSectionID=' . $object -> getID();
                    $result = $this -> _dbc -> query($sql);
                     if (PEAR::isError($result)) {
-                        throw new AP5L_Db_Exception($result -> toString());
+                        throw new \Apl\Db\Exception($result -> toString());
                     }
                     $sql = 'DELETE FROM ' . $this -> _prefix . 'permissiondef'
                         . ' WHERE permissionSectionID=' . $object -> getID();
                     $result = $this -> _dbc -> query($sql);
                     if (PEAR::isError($result)) {
-                        throw new AP5L_Db_Exception($result -> toString());
+                        throw new \Apl\Db\Exception($result -> toString());
                     }
                     $this -> _removePermissionOrphans();
                     return;
                 }
                 break;
 
-                case 'AP5L_Acl_Requester': {
+                case '\Apl\Acl\Requester': {
                     $sql = 'DELETE FROM ' . $this -> _prefix . 'requester AS r'
                          .', ' . $this -> _prefix . 'permission AS p'
                         . ' WHERE r.requesterID=' . $object -> getID()
                         . ' AND s.requesterID=p.requesterID';
                     $result = $this -> _dbc -> query($sql);
                     if (PEAR::isError($result)) {
-                        throw new AP5L_Db_Exception($result -> toString());
+                        throw new \Apl\Db\Exception($result -> toString());
                     }
                     return;
                 }
                 break;
 
-                case 'AP5L_Acl_RequesterSection': {
+                case '\Apl\Acl\RequesterSection': {
                     $sql = 'DELETE FROM ' . $this -> _prefix . 'requestersection'
                         . ' WHERE requesterSectionID=' . $object -> getID();
                    $result = $this -> _dbc -> query($sql);
                     if (PEAR::isError($result)) {
-                        throw new AP5L_Db_Exception($result -> toString());
+                        throw new \Apl\Db\Exception($result -> toString());
                     }
                     $sql = 'DELETE FROM ' . $this -> _prefix . 'requester'
                         . ' WHERE requesterSectionID=' . $object -> getID();
                     $result = $this -> _dbc -> query($sql);
                     if (PEAR::isError($result)) {
-                        throw new AP5L_Db_Exception($result -> toString());
+                        throw new \Apl\Db\Exception($result -> toString());
                     }
                     $this -> _removePermissionOrphans();
                     return;
@@ -525,14 +525,14 @@ class AP5L_Acl_Store_Mdb2 extends AP5L_Acl_Store_Sql {
             return;
             $className = $object;
             if (! isset($this -> _classToTable[$className])) {
-                throw new AP5L_Db_Exception('Can\'t handle class name ' . $className . '.');
+                throw new \Apl\Db\Exception('Can\'t handle class name ' . $className . '.');
             }
-            if ($className == 'AP5L_Acl_Domain') {
+            if ($className == '\Apl\Acl\Domain') {
                 $where = '';
                 $glue = ' WHERE ';
             } else {
                 if (! $this -> _domainID) {
-                    throw new AP5L_Acl_Exception('Must set domain first.');
+                    throw new \Apl\Acl\Exception('Must set domain first.');
                 }
                 $where = ' WHERE domainID=' . $this -> _domainID;
                 $glue = ' AND ';
@@ -550,12 +550,12 @@ class AP5L_Acl_Store_Mdb2 extends AP5L_Acl_Store_Sql {
                 }
             }
         } else {
-            throw new AP5L_Db_Exception('First parameter must be class name or object.');
+            throw new \Apl\Db\Exception('First parameter must be class name or object.');
         }
         // Run the query
         $result = $this -> _dbc -> query($sql . $where);
         if (PEAR::isError($result)) {
-            throw new AP5L_Db_Exception($result -> toString());
+            throw new \Apl\Db\Exception($result -> toString());
         }
     }
 
@@ -573,13 +573,13 @@ class AP5L_Acl_Store_Mdb2 extends AP5L_Acl_Store_Sql {
      * connection.
      *
      * @param string A MDB2 style DSN.
-     * @return AP5L_Acl_Store_Mdb2 The new data store object.
-     * @throws AP5L_Db_Exception If the connection fails.
+     * @return Mdb2 The new data store object.
+     * @throws \Apl\Db\Exception If the connection fails.
      */
     static function &factory($dsn) {
         $dbc = &MDB2::singleton($dsn);
         if (PEAR::isError($dsn)) {
-            throw new AP5L_Db_Exception(
+            throw new \Apl\Db\Exception(
                 'Unable to connect with ' . $dsn . ': ' . $dbc -> toString()
             );
         }
@@ -587,7 +587,7 @@ class AP5L_Acl_Store_Mdb2 extends AP5L_Acl_Store_Sql {
             MDB2_PORTABILITY_ALL
             - MDB2_PORTABILITY_EMPTY_TO_NULL
             - MDB2_PORTABILITY_FIX_CASE);
-        $store = new AP5L_Acl_Store_Mdb2();
+        $store = new Mdb2();
         $store -> setConnection($dbc);
         return $store;
     }
@@ -601,7 +601,7 @@ class AP5L_Acl_Store_Mdb2 extends AP5L_Acl_Store_Sql {
      *
      * @param object|string Either the instance of the objects to be retrieved
      * (by default by primary key values) or the name of the object's class.
-     * @param AP5L_DB_Expr|array|string Either an expression object, an array of
+     * @param Apl\Db\Expr|array|string Either an expression object, an array of
      * key value pairs, or a criteria string. An array is considered to be a
      * list of equalities that need to be satisfied. A string must be handled by
      * the implementation.
@@ -610,7 +610,7 @@ class AP5L_Acl_Store_Mdb2 extends AP5L_Acl_Store_Sql {
      * @return object|array|boolean Returns either an array of objects, or if
      * the "first" option is set, a single object if a match is found or false
      * if not.
-     * @throws AP5L_Db_Exception On any failure.
+     * @throws \Apl\Db\Exception On any failure.
      */
     function &get($object, $criteria = null, $options = array()) {
         if (is_object($object)) {
@@ -618,21 +618,21 @@ class AP5L_Acl_Store_Mdb2 extends AP5L_Acl_Store_Sql {
         } elseif (is_string($object)) {
             $className = $object;
             if (! isset($this -> _classToTable[$className])) {
-                throw new AP5L_Db_Exception('Can\'t handle class name ' . $className . '.');
+                throw new \Apl\Db\Exception('Can\'t handle class name ' . $className . '.');
             }
         } else {
-            throw new AP5L_Db_Exception('First parameter must be class name or object.');
+            throw new \Apl\Db\Exception('First parameter must be class name or object.');
         }
         /*
          * Build the WHERE clause
          */
         $tableName = $this -> _classToTable[$className];
-        if ($className == 'AP5L_Acl_Domain') {
+        if ($className == '\Apl\Acl\Domain') {
             $where = '';
             $glue = ' WHERE ';
         } else {
             if (! $this -> _domainID) {
-                throw new AP5L_Acl_Exception('Must set domain first.');
+                throw new \Apl\Acl\Exception('Must set domain first.');
             }
             $where = ' WHERE domainID=' . $this -> _domainID;
             $glue = ' AND ';
@@ -666,7 +666,7 @@ class AP5L_Acl_Store_Mdb2 extends AP5L_Acl_Store_Sql {
         //echo $sql . $where . $order . AP5L::LF;
         $result = $this -> _dbc -> query($sql . $where . $order);
         if (PEAR::isError($result)) {
-            throw new AP5L_Db_Exception($result -> toString());
+            throw new \Apl\Db\Exception($result -> toString());
         }
         if (! $row = $result -> fetchRow(MDB2_FETCHMODE_ASSOC)) {
             return false;
@@ -695,17 +695,17 @@ class AP5L_Acl_Store_Mdb2 extends AP5L_Acl_Store_Sql {
      *
      * Some data stores will be able to perform this in a single query.
      *
-     * @param AP5L_Acl_Tree|string An instance of the object class to be
+     * @param \Apl\Acl\Tree|string An instance of the object class to be
      * traced, or a class name.
      * @param int The ID of the starting object. Optional if the first parameter
      * is an object.
      * @param array Options.
      * @return array Returns an array of parent identifiers.
-     * @throws AP5L_Db_Exception On any failure.
+     * @throws \Apl\Db\Exception On any failure.
      */
     function &getParentPath($object, $startID = false, $options = array()) {
         if (! $this -> _domainID) {
-            throw new AP5L_Acl_Exception('Must set domain first.');
+            throw new \Apl\Acl\Exception('Must set domain first.');
         }
         if (is_object($object)) {
             $className = get_class($object);
@@ -719,7 +719,7 @@ class AP5L_Acl_Store_Mdb2 extends AP5L_Acl_Store_Sql {
             $walkID = $startID;
         }
         if (! isset(self::$_parentCol[$className])) {
-            throw new AP5L_Acl_Exception('Class has no parent relationships.');
+            throw new \Apl\Acl\Exception('Class has no parent relationships.');
         }
         $parents = array();
         if (! $walkID) {
@@ -735,7 +735,7 @@ class AP5L_Acl_Store_Mdb2 extends AP5L_Acl_Store_Sql {
             //echo $sql . $where . AP5L::LF;
             $walkID = $this -> _dbc -> queryOne($sql . $where);
             if (PEAR::isError($walkID)) {
-                throw new AP5L_Db_Exception($walkID -> toString());
+                throw new \Apl\Db\Exception($walkID -> toString());
             }
             array_unshift($parents, $walkID);
         } while ($walkID);
@@ -749,29 +749,29 @@ class AP5L_Acl_Store_Mdb2 extends AP5L_Acl_Store_Sql {
      * @param array A list of integer requester IDs in the path.
      * @param int An optional permission ID. If not provided, all permissions
      * are returned.
-     * @return array All matching AP5L_Acl_Permission objects.
-     * @throws AP5L_Db_Exception On any failure.
+     * @return array All matching \Apl\Acl\Permission objects.
+     * @throws \Apl\Db\Exception On any failure.
      */
     function &getPermissions($assets, $requesters, $permission = 0) {
-        $colMap = &self::$_memberToCol['AP5L_Acl_Permission'];
-        $apk = self::$_primaryKey['AP5L_Acl_Asset'][0];
-        $rpk = self::$_primaryKey['AP5L_Acl_Requester'][0];
+        $colMap = &self::$_memberToCol['\Apl\Acl\Permission'];
+        $apk = self::$_primaryKey['\Apl\Acl\Asset'][0];
+        $rpk = self::$_primaryKey['\Apl\Acl\Requester'][0];
         $sql = 'SELECT *'
-            . ' FROM ' . $this -> _classToTable['AP5L_Acl_Permission']
+            . ' FROM ' . $this -> _classToTable['\Apl\Acl\Permission']
             . ' WHERE isEnabled=\'T\''
             . ' AND ' . $apk . ' IN (' . implode(',', $assets) . ')'
             . ' AND ' . $rpk . ' IN (' . implode(',', $requesters) . ')'
             ;
         if ($permission) {
-            $pdpk = self::$_primaryKey['AP5L_Acl_PermissionDefinition'][0];
+            $pdpk = self::$_primaryKey['\Apl\Acl\PermissionDefinition'][0];
             $sql .= ' AND ' . $pdpk . '=' . $permission;
         }
         //echo $sql . AP5L::LF;
         $result = $this -> _dbc -> query($sql);
         if (PEAR::isError($result)) {
-            throw new AP5L_Db_Exception($result -> toString());
+            throw new \Apl\Db\Exception($result -> toString());
         }
-        $typeMap = &self::$_colType['AP5L_Acl_Permission'];
+        $typeMap = &self::$_colType['\Apl\Acl\Permission'];
         $first = true;
         $results = array();
         while ($row = $result -> fetchRow(MDB2_FETCHMODE_ASSOC)) {
@@ -780,14 +780,14 @@ class AP5L_Acl_Store_Mdb2 extends AP5L_Acl_Store_Sql {
                  * Build a specific member mapping for this query
                  */
                 $memberMap = array();
-                $c2m = &self::$_colToMember['AP5L_Acl_Permission'];
+                $c2m = &self::$_colToMember['\Apl\Acl\Permission'];
                 foreach (array_keys($row) as $col) {
                     $memberMap[$col] = $c2m[$col];
                 }
                 $first = false;
             }
             $this -> _rowCast($row, $typeMap);
-            $obj = AP5L_Acl_Permission::factory();
+            $obj = \Apl\Acl\Permission::factory();
             $obj -> setStore($this);
             $obj -> load($memberMap, $row);
             $results[] = $obj;
@@ -814,23 +814,23 @@ class AP5L_Acl_Store_Mdb2 extends AP5L_Acl_Store_Sql {
     /**
      * Get a list of permissions with names.
      *
-     * @param AP5L_Db_Expr|array An array of key value pairs, must include asset
+     * @param \Apl\Db\Expr|array An array of key value pairs, must include asset
      * ID, requester ID, and may include other criteria including permission
      * section. (DB expressions for future).
      * @param array Options.
      * @return array|boolean Returns either an array permission values indexed
      * by name, or false if no permissions match.
-     * @throws AP5L_Db_Exception On any failure.
+     * @throws \Apl\Db\Exception On any failure.
      */
     function &permissionList($criteria, $options = array()) {
         /*
          * Build the WHERE clause
          */
         if (! $this -> _domainID) {
-            throw new AP5L_Acl_Exception('Must set domain first.');
+            throw new \Apl\Acl\Exception('Must set domain first.');
         }
         if (! isset($criteria['_assetID']) || ! isset($criteria['_requesterID'])) {
-            throw new AP5L_Acl_Exception('Must provide asset and requester.');
+            throw new \Apl\Acl\Exception('Must provide asset and requester.');
         }
         $order = '';
         $orderGlue = ' ORDER BY ';
@@ -849,9 +849,9 @@ class AP5L_Acl_Store_Mdb2 extends AP5L_Acl_Store_Sql {
             . ' = ' . $this -> _prefix . 'permissionsection.permissionSectionID'
             ;
         $classes = array(
-            'AP5L_Acl_Permission',
-            'AP5L_Acl_PermissionDefinition',
-            'AP5L_Acl_PermissionSection'
+            '\Apl\Acl\Permission',
+            '\Apl\Acl\PermissionDefinition',
+            '\Apl\Acl\PermissionSection'
         );
         foreach ($classes as $className) {
             $tableName = $this -> _classToTable[$className];
@@ -884,7 +884,7 @@ class AP5L_Acl_Store_Mdb2 extends AP5L_Acl_Store_Sql {
         //echo $sql . $where . $order . AP5L::LF;
         $result = $this -> _dbc -> query($sql . $where . $order);
         if (PEAR::isError($result)) {
-            throw new AP5L_Db_Exception($result -> toString());
+            throw new \Apl\Db\Exception($result -> toString());
         }
         $results = array();
         while ($row = $result -> fetchRow(MDB2_FETCHMODE_ORDERED)) {
@@ -900,13 +900,13 @@ class AP5L_Acl_Store_Mdb2 extends AP5L_Acl_Store_Sql {
      * Put an object into the data store.
      *
      * @param object An instance of the object to be saved.
-     * @param array Options: {@see AP5L_Db_Store::put}.
-     * @throws AP5L_Db_Exception On any failure.
+     * @param array Options: {@see \Apl\Db\Store::put}.
+     * @throws \Apl\Db\Exception On any failure.
      */
     function put(&$object, $options = array()) {
         $className = get_class($object);
         if (! isset($this -> _classToTable[$className])) {
-            throw new AP5L_Db_Exception('Can\'t handle class name ' . $className . '.');
+            throw new \Apl\Db\Exception('Can\'t handle class name ' . $className . '.');
         }
         /*
          * The caller can force either insert or replace mode
@@ -953,11 +953,11 @@ class AP5L_Acl_Store_Mdb2 extends AP5L_Acl_Store_Sql {
         /*
          * Validate the domainID
          */
-        if ($className == 'AP5L_Acl_Domain' && $replaceMode) {
+        if ($className == '\Apl\Acl\Domain' && $replaceMode) {
             // we're good...
         } elseif (isset($values['domainID']) && $values['domainID']) {
             if ($values['domainID'] != $this -> _domainID) {
-                throw new AP5L_Acl_Exception('Object is not in current domain.');
+                throw new \Apl\Acl\Exception('Object is not in current domain.');
             }
         } else {
             $values['domainID'] = $this -> _domainID;
@@ -984,7 +984,7 @@ class AP5L_Acl_Store_Mdb2 extends AP5L_Acl_Store_Sql {
         //echo $sql . AP5L::LF;
         $result = $this -> _dbc -> query($sql);
         if (PEAR::isError($result)) {
-            throw new AP5L_Db_Exception($result -> toString());
+            throw new \Apl\Db\Exception($result -> toString());
         }
         if ($getNewAuto) {
             $object -> setID($this -> _dbc  -> lastInsertID());
@@ -1000,17 +1000,17 @@ class AP5L_Acl_Store_Mdb2 extends AP5L_Acl_Store_Sql {
      * target and then deleted.
      * @param mixed The destination section. This section will receive permissions
      * from the source.
-     * @throws AP5L_Db_Exception On any database error.
+     * @throws \Apl\Db\Exception On any database error.
      */
     function sectionMerge($fromSection, $toSection) {
         $className = get_class($fromSection);
         if (! isset($this -> _classToTable[$className])) {
-            throw new AP5L_Db_Exception('Can\'t handle class name ' . $className . '.');
+            throw new \Apl\Db\Exception('Can\'t handle class name ' . $className . '.');
         }
         $sectionKey = self::$_primaryKey[$className][0];
         foreach ($fromSection -> getSectionMemberClasses() as $className) {
             if (! isset($this -> _classToTable[$className])) {
-                throw new AP5L_Db_Exception('Can\'t handle class name ' . $className . '.');
+                throw new \Apl\Db\Exception('Can\'t handle class name ' . $className . '.');
             }
             $sql = 'UPDATE ' . $this -> _classToTable[$className]
                 . ' SET ' . $sectionKey . '=' . $toSection -> getID()
@@ -1018,7 +1018,7 @@ class AP5L_Acl_Store_Mdb2 extends AP5L_Acl_Store_Sql {
                 ;
             $result = $this -> _dbc -> query($sql);
             if (PEAR::isError($result)) {
-                throw new AP5L_Db_Exception($result -> toString());
+                throw new \Apl\Db\Exception($result -> toString());
             }
         }
         $this -> delete($fromSection);
@@ -1033,13 +1033,13 @@ class AP5L_Acl_Store_Mdb2 extends AP5L_Acl_Store_Sql {
      *
      * @param object|string Either the instance of the objects to be retrieved
      * (by primary key values) or the name of the object's class.
-     * @param AP5L_Db_Expr|array|string Either an expression object, an array of
+     * @param \Apl\Db\Expr|array|string Either an expression object, an array of
      * key value pairs, or a criteria string. An array is considered to be a
      * list of equalities that need to be satisfied. A string must be handled by
      * the implementation.
      * @param array Options are implementation specific.
-     * @return AP5L_Db_RecordSet The set of selected objects.
-     * @throws AP5L_Db_Exception On any failure.
+     * @return \Apl\Db\RecordSet The set of selected objects.
+     * @throws \Apl\Db\Exception On any failure.
      */
     function &select($object, $criteria = null, $options = array()) {
     }
@@ -1065,7 +1065,7 @@ class AP5L_Acl_Store_Mdb2 extends AP5L_Acl_Store_Sql {
      * Update an object in the data store.
      *
      * @param object An instance of the object to be saved.
-     * @param AP5L_Db_Expr|array|string Either an expression object, an array of
+     * @param \Apl\Db\Expr|array|string Either an expression object, an array of
      * key value pairs, or a criteria string. An array is considered to be a
      * list of equalities that need to be satisfied. A string must be handled by
      * the implementation.
@@ -1078,12 +1078,12 @@ class AP5L_Acl_Store_Mdb2 extends AP5L_Acl_Store_Sql {
      * supplied, then the properties in the mask are removed from the update. If
      * both a list and a mask are supplied, then the mask is applied to the
      * list.
-     * @throws AP5L_Db_Exception On any failure.
+     * @throws \Apl\Db\Exception On any failure.
      */
     function update($object, $criteria = null, $options = array()) {
         $className = get_class($object);
         if (! isset($this -> _classToTable[$className])) {
-            throw new AP5L_Db_Exception('Can\'t handle class name ' . $className . '.');
+            throw new \Apl\Db\Exception('Can\'t handle class name ' . $className . '.');
         }
         /*
          * Determine which properties are being updated
@@ -1122,10 +1122,10 @@ class AP5L_Acl_Store_Mdb2 extends AP5L_Acl_Store_Sql {
          * Validate the domainID
          */
         if (isset($values['domainID']) && $values['domainID'] != $this -> _domainID) {
-            throw new AP5L_Acl_Exception('Object is not in current domain.');
+            throw new \Apl\Acl\Exception('Object is not in current domain.');
         }
         if (isset($keyValues['domainID']) && $keyValues['domainID'] != $this -> _domainID) {
-            throw new AP5L_Acl_Exception('Object is not in current domain.');
+            throw new \Apl\Acl\Exception('Object is not in current domain.');
         }
         /*
          * Generate the SQL.
@@ -1147,7 +1147,7 @@ class AP5L_Acl_Store_Mdb2 extends AP5L_Acl_Store_Sql {
          */
         $result = $this -> _dbc -> query($sql);
         if (PEAR::isError($result)) {
-            throw new AP5L_Db_Exception($result -> toString());
+            throw new \Apl\Db\Exception($result -> toString());
         }
     }
 

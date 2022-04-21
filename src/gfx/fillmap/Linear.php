@@ -9,11 +9,12 @@
  * @version $Id: Linear.php 91 2009-08-21 02:45:29Z alan.langford@abivia.com $
  * @author Alan Langford <alan.langford@abivia.com>
  */
+namespace \Apl\Gfx\FillMap;
 
 /**
  * Encapsulates calculations for a two point linear fill
  */
-class AP5L_Gfx_FillMap_Linear extends AP5L_Gfx_FillMap {
+class Linear extends FillMap {
 
     /**
      * The remapped fill angle.

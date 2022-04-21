@@ -1,18 +1,18 @@
 <?php
 /**
- * Abivia PHP5 Library
+ * Abivia PHP Library
  *
- * @package AP5L
+ * @package Apl
  * @license http://www.gnu.org/licenses/gpl-3.0.html GPLv3
  * @copyright 2008, Alan Langford
- * @version $Id: Text.php 100 2011-03-21 18:26:21Z alan.langford@abivia.com $
  * @author Alan Langford <alan.langford@abivia.com>
  */
+namespace Apl;
 
 /**
  * Text: Base and helper functions for text processing.
  */
-class AP5L_Text extends AP5L_Php_InflexibleObject {
+class Text extends Php\InflexibleObject {
 
     /**
      * Determine line delimiter for a file.

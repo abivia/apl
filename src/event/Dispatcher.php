@@ -1,17 +1,18 @@
 <?php
 /**
- * AP5L The Abivia PHP5 Library
+ * Apl The Abivia PHP Library
  *
  * @license http://www.gnu.org/licenses/gpl-3.0.html GPLv3
  * @copyright 2007-2008, Alan Langford
  * @version $Id: Dispatcher.php 100 2011-03-21 18:26:21Z alan.langford@abivia.com $
  * @author Alan Langford <alan.langford@abivia.com>
  */
+namespace Apl\Event;
 
 /**
  * Event dispatcher.
  */
-class AP5L_Event_Dispatcher {
+class Dispatcher {
     /**
      * Static reference array of named instances.
      *
@@ -69,19 +70,19 @@ class AP5L_Event_Dispatcher {
      * @param mixed Either a valid PHP callback or an object. If an object
      * is provided, it must have an update() method.
      * @return mixed The "callable name" for the callback.
-     * @throws AP5L_Event_Exception If the callback is not valid.
+     * @throws Exception If the callback is not valid.
      */
     protected function _checkCallback(&$callback) {
        if (!is_string($callback) || !is_callable($callback, false, $reg)) {
             if (is_object($callback) && !is_callable(array($callback, 'update'), false, $reg)
             ) {
-                throw new AP5L_Event_Exception(
+                throw new Exception(
                     'Callback object must have an update() method.'
                 );
             }
             $callback = array($callback, 'update');
         } else {
-            throw new AP5L_Event_Exception('Invalid callback.');
+            throw new Exception('Invalid callback.');
         }
         return $callback;
     }
@@ -165,17 +166,17 @@ class AP5L_Event_Dispatcher {
      * @param string Name of the notification dispatcher.
      * @param string Class name for notification objects, must implement
      * update().
-     * @return object AP5L_Event_Dispatcher
+     * @return object \Apl\Event\Dispatcher
      */
     public static final function getInstance(
-        $name = '', $notificationClass = 'AP5L_Event_Notification'
+        $name = '', $notificationClass = '\Apl\Event\Notification'
     ) {
         if (
             !isset(self::$_instances[$name])
             || !isset(self::$_instances[$name][$notificationClass])
         ) {
             self::$_instances[$name][$notificationClass] =
-                new AP5L_Event_Dispatcher($name, $notificationClass);
+                new Dispatcher($name, $notificationClass);
         }
         return self::$_instances[$name][$notificationClass];
     }
@@ -219,7 +220,7 @@ class AP5L_Event_Dispatcher {
     /**
      * Posts a notification object.
      *
-     * @param AP5L_Event_Notification The Notification object
+     * @param \Apl\Event\Notification The Notification object
      * @param string Name of object class passed in notification object
      * @param string The name of the notification event.
      * @param array Options. Possible options include:
@@ -231,7 +232,7 @@ class AP5L_Event_Dispatcher {
      * @return object The notification object.
      */
     public function notify(
-        AP5L_Event_Notification $notification,
+        Notification $notification,
         $eventName = null,
         $options = array()
     ) {
@@ -292,7 +293,7 @@ class AP5L_Event_Dispatcher {
 
     public function setOption($optionName, $value) {
         if (! isset($this -> _options[$optionName])) {
-            throw new AP5L_Event_Exception('Unknown option name "' . $optionName . '"');
+            throw new Exception('Unknown option name "' . $optionName . '"');
         }
         $this -> _options[$optionName] = $value;
         // If we're not queuing, clear pending events.

@@ -1,17 +1,18 @@
 <?php
 /**
- * AP5L The Abivia PHP5 Library
+ * Apl The Abivia PHP Library
  *
  * @license http://www.gnu.org/licenses/gpl-3.0.html GPLv3
  * @copyright 2007-2008, Alan Langford
  * @version $Id: Notification.php 93 2009-08-21 03:05:34Z alan.langford@abivia.com $
  * @author Alan Langford <alan.langford@abivia.com>
  */
+namespace Apl\Event;
 
 /**
  * Event notification
  */
-class AP5L_Event_Notification {
+class Notification {
     /**
      * Initial notification state.
      */
@@ -68,7 +69,7 @@ class AP5L_Event_Notification {
      *
      * @return void
      */
-    public function __construct($object, $name, array $info = null) {
+    public function __construct($object, $name, $info = null) {
         $this -> _object = $object;
         $this -> _name = $name;
         $this -> _info = $info;
